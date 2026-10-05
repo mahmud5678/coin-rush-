@@ -3,6 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("./coinrush.db");
 
 db.serialize(() => {
+
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,9 +13,21 @@ db.serialize(() => {
       coins INTEGER DEFAULT 0,
       xp INTEGER DEFAULT 0,
       level INTEGER DEFAULT 1,
+      plays INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Existing database হলে plays column যোগ করবে
+  db.run(`
+    ALTER TABLE users
+    ADD COLUMN plays INTEGER DEFAULT 0
+  `, (err) => {
+    if (err && !err.message.includes("duplicate column name")) {
+      console.log("plays column:", err.message);
+    }
+  });
+
 
   db.run(`
     CREATE TABLE IF NOT EXISTS game_events (
@@ -25,6 +38,7 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
 
   db.run(`
     CREATE TABLE IF NOT EXISTS withdrawals (
@@ -38,6 +52,7 @@ db.serialize(() => {
       processed_at DATETIME
     )
   `);
+
 });
 
 module.exports = db;
