@@ -1,484 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Coin Rush</title>
 
-  <!-- Telegram Mini App -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <title>Coin Rush</title>
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+body{
+ margin:0;
+ min-height:100vh;
+ color:white;
+ background:linear-gradient(135deg,#111827,#1e3a8a)
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #10152b;
-      color: white;
-      text-align: center;
-    }
+.container{
+ max-width:520px;
+ margin:auto;
+ padding:18px
+}
 
-    .game {
-      max-width: 500px;
-      min-height: 100vh;
-      margin: auto;
-      padding: 20px;
-    }
+.card{
+ background:rgba(255,255,255,.1);
+ border-radius:18px;
+ padding:18px;
+ margin-bottom:15px
+}
 
-    h1 {
-      margin: 10px 0 20px;
-    }
+h1{text-align:center}
 
-    .card {
-      background: #1c2442;
-      border-radius: 20px;
-      padding: 20px;
-      margin: 15px 0;
-    }
+.subtitle{
+ text-align:center;
+ opacity:.7
+}
 
-    .coins {
-      font-size: 38px;
-      font-weight: bold;
-      margin: 10px 0;
-    }
+.stats{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px
+}
 
-    .balance {
-      font-size: 30px;
-      font-weight: bold;
-      margin: 10px;
-    }
+.stat{
+ background:rgba(0,0,0,.2);
+ padding:14px;
+ border-radius:12px;
+ text-align:center
+}
 
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 14px 22px;
-      margin: 7px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.stat strong{
+ display:block;
+ font-size:24px;
+ margin-top:5px
+}
 
-    .play {
-      width: 80%;
-      font-size: 20px;
-    }
+button,input,select{
+ width:100%;
+ padding:13px;
+ margin-top:9px;
+ border:0;
+ border-radius:10px
+}
 
-    input,
-    select {
-      width: 90%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 0;
-      margin: 8px;
-      font-size: 16px;
-    }
+button{
+ font-size:16px;
+ font-weight:bold
+}
 
-    #message,
-    #withdrawMessage {
-      min-height: 25px;
-      margin: 10px;
-    }
+.play{background:#facc15}
+.reward{background:#22c55e;color:white}
+.withdraw{background:#3b82f6;color:white}
+.referral{background:#8b5cf6;color:white}
 
-    .small {
-      opacity: 0.7;
-      font-size: 13px;
-    }
-  </style>
+.mission{
+ background:rgba(0,0,0,.2);
+ padding:12px;
+ margin-top:8px;
+ border-radius:10px
+}
+
+.progress{
+ height:10px;
+ background:rgba(255,255,255,.2);
+ border-radius:10px;
+ margin-top:10px;
+ overflow:hidden
+}
+
+#xpBar{
+ height:100%;
+ width:0%;
+ background:#facc15
+}
+
+.small{
+ font-size:13px;
+ opacity:.7
+}
+
+.message{
+ text-align:center;
+ margin-top:10px
+}
+</style>
 </head>
 
 <body>
 
-  <div class="game">
+<div class="container">
 
-    <h1>🪙 Coin Rush</h1>
+<div class="card">
+<h1>🪙 Coin Rush</h1>
+<div class="subtitle">Play • Earn • Complete Missions</div>
+</div>
 
-    <!-- Player -->
-    <div class="card">
-      <h2>👤 Player</h2>
-      <p id="playerName">Guest Player</p>
-    </div>
+<div class="card">
+<h3>👤 Player</h3>
+<div id="playerName">Connecting...</div>
+<div class="small" id="connection">Connecting to server...</div>
+</div>
 
-    <!-- Coins -->
-    <div class="card">
+<div class="card">
 
-      <div>Your Coins</div>
+<div class="stats">
 
-      <div class="coins">
-        🪙 <span id="coins">0</span>
-      </div>
+<div class="stat">
+🪙 Coins
+<strong id="coins">0</strong>
+</div>
 
-      <div>
-        Level: <span id="level">1</span>
-      </div>
+<div class="stat">
+⭐ Level
+<strong id="level">1</strong>
+</div>
 
-      <div>
-        XP: <span id="xp">0</span>/100
-      </div>
+<div class="stat">
+⚡ XP
+<strong id="xp">0</strong>
+</div>
 
-    </div>
+<div class="stat">
+🎮 Plays
+<strong id="plays">0</strong>
+</div>
 
-    <!-- Game -->
-    <div class="card">
+</div>
 
-      <h2>⚡ Coin Challenge</h2>
+<p>Level progress</p>
 
-      <p>Play and collect virtual coins!</p>
+<div class="progress">
+<div id="xpBar"></div>
+</div>
 
-      <button class="play" onclick="playGame()">
-        🎮 PLAY
-      </button>
+<button class="play" onclick="playGame()">
+🎮 PLAY & EARN
+</button>
 
-      <div id="message"></div>
+<div class="message" id="gameMessage"></div>
 
-    </div>
+</div>
 
-    <!-- Daily Reward -->
-    <div class="card">
 
-      <h2>🎁 Daily Reward</h2>
+<div class="card">
 
-      <p>Claim your daily virtual coin reward.</p>
+<h3>🎁 Daily Reward</h3>
 
-      <button onclick="dailyReward()">
-        🎁 CLAIM REWARD
-      </button>
+<p class="small">
+Claim your daily reward once per day.
+</p>
 
-    </div>
+<button class="reward" onclick="dailyReward()">
+🎁 CLAIM DAILY REWARD
+</button>
 
-    <!-- Leaderboard -->
-    <div class="card">
+</div>
 
-      <h2>🏆 Leaderboard</h2>
 
-      <p>🥇 Player 1 — 1250 coins</p>
-      <p>🥈 Player 2 — 980 coins</p>
-      <p>🥉 Player 3 — 750 coins</p>
+<div class="card">
 
-    </div>
+<h3>🎯 Missions</h3>
 
-    <!-- Wallet -->
-    <div class="card">
+<div class="mission">
+🎮 Play 5 times
+<div id="mission5">0 / 5</div>
+</div>
 
-      <h2>💰 Reward Wallet</h2>
+<div class="mission">
+🎮 Play 10 times
+<div id="mission10">0 / 10</div>
+</div>
 
-      <p>Available Reward</p>
+<div class="mission">
+⭐ Reach Level 5
+<div id="missionLevel">Level 1 / 5</div>
+</div>
 
-      <div class="balance">
-        ৳<span id="balance">0</span>
-      </div>
+</div>
 
-      <input
-        id="withdrawAmount"
-        type="number"
-        placeholder="Minimum ৳100"
-        min="100"
-      >
 
-      <select id="paymentMethod">
-        <option value="">Select payment method</option>
-        <option value="bKash">bKash</option>
-        <option value="Nagad">Nagad</option>
-      </select>
+<div class="card">
 
-      <input
-        id="paymentNumber"
-        type="text"
-        placeholder="Payment number"
-      >
+<h3>👥 Invite Friends</h3>
 
-      <button onclick="withdraw()">
-        💸 WITHDRAW
-      </button>
+<p class="small">
+Invite friends using your referral link.
+</p>
 
-      <div id="withdrawMessage"></div>
+<input id="refLink" readonly>
 
-      <p class="small">
-        Reward withdrawals are subject to verification and eligibility.
-      </p>
+<button class="referral" onclick="copyReferral()">
+📋 COPY REFERRAL LINK
+</button>
 
-    </div>
+</div>
 
-    <!-- Reset -->
-    <button onclick="resetGame()">
-      🔄 RESET GAME
-    </button>
 
-  </div>
+<div class="card">
 
+<h3>💰 Reward Wallet</h3>
 
-  <script>
+<p>
+Available:
+<strong id="walletCoins">0</strong> coins
+</p>
 
-    /* Telegram */
+<p class="small">
+Minimum withdrawal: 100 coins
+</p>
 
-    const tg = window.Telegram.WebApp;
+<select id="withdrawMethod">
 
-    if (window.Telegram && Telegram.WebApp) {
-      tg.ready();
-      tg.expand();
-    }
+<option value="">
+Select payment method
+</option>
 
+<option value="bKash">
+bKash
+</option>
 
-    /* Player */
+<option value="Nagad">
+Nagad
+</option>
 
-    let playerName = "Guest Player";
+</select>
 
-    if (
-      window.Telegram &&
-      Telegram.WebApp &&
-      Telegram.WebApp.initDataUnsafe &&
-      Telegram.WebApp.initDataUnsafe.user
-    ) {
+<input
+ id="withdrawAmount"
+ type="number"
+ min="100"
+ placeholder="Coin amount">
 
-      const user = Telegram.WebApp.initDataUnsafe.user;
+<input
+ id="paymentNumber"
+ type="text"
+ placeholder="bKash/Nagad number">
 
-      playerName =
-        user.first_name ||
-        user.username ||
-        "Telegram Player";
-    }
+<button class="withdraw" onclick="withdrawRequest()">
+💸 REQUEST WITHDRAWAL
+</button>
 
-    document.getElementById("playerName").textContent =
-      playerName;
+<div class="message" id="withdrawMessage"></div>
 
+</div>
 
-    /* Game data */
 
-    let coins =
-      Number(localStorage.getItem("coins")) || 0;
+<div class="card">
 
-    let xp =
-      Number(localStorage.getItem("xp")) || 0;
+<h3>🏆 Leaderboard</h3>
 
-    let level =
-      Number(localStorage.getItem("level")) || 1;
+<div id="leaderboard">
+Loading...
+</div>
 
-    let balance =
-      Number(localStorage.getItem("balance")) || 0;
+</div>
 
+</div>
 
-    /* Update screen */
 
-    function update() {
+<script>
 
-      document.getElementById("coins").textContent =
-        coins;
+const API =
+"https://coin-rush-nxeb.onrender.com";
 
-      document.getElementById("xp").textContent =
-        xp;
+const tg =
+window.Telegram.WebApp;
 
-      document.getElementById("level").textContent =
-        level;
+tg.ready();
+tg.expand();
 
-      document.getElementById("balance").textContent =
-        balance;
 
+let initData =
+tg.initData || "";
 
-      localStorage.setItem(
-        "coins",
-        coins
-      );
+let currentUser = null;
 
-      localStorage.setItem(
-        "xp",
-        xp
-      );
 
-      localStorage.setItem(
-        "level",
-        level
-      );
+/* =========================
+   SERVER REQUEST
+========================= */
 
-      localStorage.setItem(
-        "balance",
-        balance
-      );
-    }
+async function api(path, options={}){
 
+ const response =
+ await fetch(API + path, {
 
-    /* Play */
+   ...options,
 
-    function playGame() {
+   headers:{
+     "Content-Type":
+       "application/json",
 
-      const reward =
-        Math.floor(Math.random() * 21) + 10;
+     ...(options.headers || {})
+   }
 
-      coins += reward;
+ });
 
-      xp += 10;
+ return await response.json();
 
+}
 
-      if (xp >= 100) {
 
-        xp -= 100;
+/* =========================
+   AUTH
+========================= */
 
-        level++;
+async function login(){
 
-        document.getElementById("message").textContent =
-          "🎉 LEVEL UP! You reached Level " + level;
+ try{
 
-      } else {
+   if(!initData){
 
-        document.getElementById("message").textContent =
-          "🪙 +" + reward + " coins!";
-
-      }
-
-
-      update();
-    }
-
-
-    /* Daily reward */
-
-    function dailyReward() {
-
-      const today =
-        new Date().toDateString();
-
-      const last =
-        localStorage.getItem("daily");
-
-
-      if (last === today) {
-
-        document.getElementById("message").textContent =
-          "⏳ Daily reward already claimed!";
-
-        return;
-      }
-
-
-      coins += 100;
-
-      localStorage.setItem(
-        "daily",
-        today
-      );
-
-
-      document.getElementById("message").textContent =
-        "🎁 +100 coins!";
-
-
-      update();
-    }
-
-
-    /* Withdrawal request */
-
-    function withdraw() {
-
-      const amount =
-        Number(
-          document.getElementById(
-            "withdrawAmount"
-          ).value
-        );
-
-
-      const method =
-        document.getElementById(
-          "paymentMethod"
-        ).value;
-
-
-      const number =
-        document.getElementById(
-          "paymentNumber"
-        ).value.trim();
-
-
-      const message =
-        document.getElementById(
-          "withdrawMessage"
-        );
-
-
-      if (amount < 100) {
-
-        message.textContent =
-          "⚠️ Minimum withdrawal is ৳100.";
-
-        return;
-      }
-
-
-      if (amount > balance) {
-
-        message.textContent =
-          "❌ Insufficient reward balance.";
-
-        return;
-      }
-
-
-      if (!method) {
-
-        message.textContent =
-          "⚠️ Select a payment method.";
-
-        return;
-      }
-
-
-      if (!number) {
-
-        message.textContent =
-          "⚠️ Enter your payment number.";
-
-        return;
-      }
-
-
-      message.textContent =
-        "✅ Withdrawal request submitted for verification.";
-
-    }
-
-
-    /* Reset */
-
-    function resetGame() {
-
-      coins = 0;
-
-      xp = 0;
-
-      level = 1;
-
-      balance = 0;
-
-
-      localStorage.removeItem("coins");
-      localStorage.removeItem("xp");
-      localStorage.removeItem("level");
-      localStorage.removeItem("balance");
-      localStorage.removeItem("daily");
-
-
-      document.getElementById("message").textContent =
-        "🔄 Game reset!";
-
-
-      document.getElementById("withdrawMessage").textContent =
-        "";
-
-
-      update();
-    }
-
-
-    /* Start */
-
-    update();
-
-  </script>
-
-</body>
-
-</html>
+     document.getElementById(
+      
