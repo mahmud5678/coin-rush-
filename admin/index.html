@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title><style>
+<title>Coin Rush Admin</title>
+
+<style>
 body{
   margin:0;
   padding:20px;
@@ -93,6 +96,11 @@ button{
   font-weight:bold;
 }
 
+#loginMessage{
+  text-align:center;
+  min-height:20px;
+}
+
 @media(max-width:500px){
   .stats{
     grid-template-columns:1fr;
@@ -102,60 +110,119 @@ button{
     grid-column:auto;
   }
 }
-</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
-type="password"
-id="adminKey"
-placeholder="Admin key"
+</style>
+</head>
 
-«»
+<body>
 
-<button class="login" id="loginButton">
-🔐 LOGIN
-</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>📊 Dashboard</h2><div class="stats"><div class="stat">
+<div class="container">
+
+<h1>🛠️ Coin Rush Admin</h1>
+
+<div class="card" id="loginBox">
+
+<h3>Admin Login</h3>
+
+<input
+  type="password"
+  id="adminKey"
+  placeholder="Admin key"
+>
+
+<button
+  type="button"
+  class="login"
+  id="loginButton">
+  🔐 LOGIN
+</button>
+
+<p id="loginMessage"></p>
+
+</div>
+
+
+<div class="card" id="panel" style="display:none">
+
+<h2>📊 Dashboard</h2>
+
+<div class="stats">
+
+<div class="stat">
 <strong>👥 Total Users</strong>
 <h2 id="totalUsers">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>⏳ Pending</strong>
 <h2 id="pendingCount">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>✅ Approved</strong>
 <h2 id="approvedCount">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>❌ Rejected</strong>
 <h2 id="rejectedCount">-</h2>
-</div><div class="stat full">
+</div>
+
+<div class="stat full">
 <strong>💰 Total Withdrawal Coins</strong>
 <h2 id="totalCoins">-</h2>
-</div></div><h2>💰 Withdrawal Management</h2><button id="refreshButton">
-🔄 REFRESH
-</button><h3>⏳ Pending Withdrawals</h3><div id="pendingRequests">
+</div>
+
+</div>
+
+<h2>💰 Withdrawal Management</h2>
+
+<button
+  type="button"
+  id="refreshButton">
+  🔄 REFRESH
+</button>
+
+<h3>⏳ Pending Withdrawals</h3>
+
+<div id="pendingRequests">
 Loading...
-</div><h3>📜 Withdrawal History</h3><div id="history">
+</div>
+
+<h3>📜 Withdrawal History</h3>
+
+<div id="history">
 Loading...
-</div></div></div><script>
+</div>
+
+</div>
+
+</div>
+
+
+<script>
 
 const API = "https://coin-rush-nxeb.onrender.com";
 
 let adminKey = "";
 
 
-document
-  .getElementById("loginButton")
-  .addEventListener("click", login);
+document.getElementById("loginButton")
+.addEventListener("click", login);
 
 
-document
-  .getElementById("refreshButton")
-  .addEventListener("click", refreshAll);
+document.getElementById("refreshButton")
+.addEventListener("click", refreshAll);
 
 
 async function login(){
 
-  adminKey =
-    document.getElementById("adminKey").value.trim();
+  const input =
+    document.getElementById("adminKey");
 
   const message =
     document.getElementById("loginMessage");
+
+  adminKey = input.value.trim();
 
   if(!adminKey){
 
@@ -173,6 +240,7 @@ async function login(){
     const response = await fetch(
       API + "/api/admin/withdrawals/all",
       {
+        method:"GET",
         headers:{
           "x-admin-key":adminKey
         }
@@ -189,15 +257,17 @@ async function login(){
       return;
     }
 
-    document.getElementById("loginBox").style.display =
-      "none";
+    document.getElementById("loginBox")
+      .style.display = "none";
 
-    document.getElementById("panel").style.display =
-      "block";
+    document.getElementById("panel")
+      .style.display = "block";
 
     await refreshAll();
 
   }catch(error){
+
+    console.error(error);
 
     message.innerText =
       "❌ Connection error.";
@@ -228,7 +298,8 @@ async function loadStats(){
       }
     );
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     if(!response.ok){
       return;
@@ -236,24 +307,24 @@ async function loadStats(){
 
     const s = data.stats;
 
-    document.getElementById("totalUsers").innerText =
-      s.total_users;
+    document.getElementById("totalUsers")
+      .innerText = s.total_users;
 
-    document.getElementById("pendingCount").innerText =
-      s.pending;
+    document.getElementById("pendingCount")
+      .innerText = s.pending;
 
-    document.getElementById("approvedCount").innerText =
-      s.approved;
+    document.getElementById("approvedCount")
+      .innerText = s.approved;
 
-    document.getElementById("rejectedCount").innerText =
-      s.rejected;
+    document.getElementById("rejectedCount")
+      .innerText = s.rejected;
 
-    document.getElementById("totalCoins").innerText =
-      s.total_withdrawal_coins;
+    document.getElementById("totalCoins")
+      .innerText = s.total_withdrawal_coins;
 
   }catch(error){
 
-    console.log("Stats error:",error);
+    console.error("Stats error:",error);
 
   }
 
@@ -274,7 +345,6 @@ async function loadRequests(){
   historyBox.innerHTML =
     "⏳ Loading...";
 
-
   try{
 
     const response = await fetch(
@@ -286,26 +356,26 @@ async function loadRequests(){
       }
     );
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     if(!response.ok){
 
       pendingBox.innerHTML =
         "❌ Authentication failed.";
 
+      historyBox.innerHTML = "";
+
       return;
     }
 
-
     const withdrawals =
       data.withdrawals || [];
-
 
     const pending =
       withdrawals.filter(
         item => item.status === "pending"
       );
-
 
     const history =
       withdrawals.filter(
@@ -350,20 +420,46 @@ async function loadRequests(){
           </p>
 
           <button
+            type="button"
             class="approve"
-            onclick="approve(${item.id})">
+            data-id="${item.id}">
             ✅ APPROVE
           </button>
 
           <button
+            type="button"
             class="reject"
-            onclick="reject(${item.id})">
+            data-id="${item.id}">
             ❌ REJECT
           </button>
 
         </div>
 
       `).join("");
+
+
+      pendingBox
+        .querySelectorAll(".approve")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => approve(button.dataset.id)
+          );
+
+        });
+
+
+      pendingBox
+        .querySelectorAll(".reject")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => reject(button.dataset.id)
+          );
+
+        });
 
     }
 
@@ -419,6 +515,8 @@ async function loadRequests(){
 
   }catch(error){
 
+    console.error(error);
+
     pendingBox.innerHTML = `
       <div class="request">
         ❌ Connection error.
@@ -438,7 +536,6 @@ async function approve(id){
     "Approve this withdrawal?"
   )) return;
 
-
   try{
 
     const response = await fetch(
@@ -451,10 +548,8 @@ async function approve(id){
       }
     );
 
-
     const data =
       await response.json();
-
 
     if(!response.ok){
 
@@ -466,16 +561,15 @@ async function approve(id){
       return;
     }
 
-
     alert(
       "✅ Withdrawal approved."
     );
 
-
     await refreshAll();
 
-
   }catch(error){
+
+    console.error(error);
 
     alert(
       "❌ Connection error."
@@ -492,7 +586,6 @@ async function reject(id){
     "Reject this withdrawal? Coins will be refunded."
   )) return;
 
-
   try{
 
     const response = await fetch(
@@ -505,10 +598,8 @@ async function reject(id){
       }
     );
 
-
     const data =
       await response.json();
-
 
     if(!response.ok){
 
@@ -520,16 +611,15 @@ async function reject(id){
       return;
     }
 
-
     alert(
       "✅ Withdrawal rejected and coins refunded."
     );
 
-
     await refreshAll();
 
-
   }catch(error){
+
+    console.error(error);
 
     alert(
       "❌ Connection error."
@@ -539,5 +629,7 @@ async function reject(id){
 
 }
 
-</script></body>
-  </html>
+</script>
+
+</body>
+</html>
