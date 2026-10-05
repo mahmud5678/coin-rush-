@@ -141,10 +141,64 @@ function login(){
   }
 
   loadRequests();
+  loadStats();
+
+  adminKey =
+    document.getElementById("adminKey").value.trim();
+
+  if(!adminKey){
+
+    document.getElementById("loginMessage").innerText =
+      "❌ Admin key required.";
+
+    return;
+  }
+
+  loadRequests();
 
 }
 
+async function loadStats(){
 
+  try{
+
+    const response = await fetch(
+      API + "/api/admin/stats",
+      {
+        headers:{
+          "x-admin-key": adminKey
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok) return;
+
+    const s = data.stats;
+
+    document.getElementById("totalUsers").innerText =
+      s.total_users;
+
+    document.getElementById("pendingCount").innerText =
+      s.pending;
+
+    document.getElementById("approvedCount").innerText =
+      s.approved;
+
+    document.getElementById("rejectedCount").innerText =
+      s.rejected;
+
+    document.getElementById("totalCoins").innerText =
+      s.total_withdrawal_coins;
+
+  }catch(error){
+
+    console.log("Stats error:", error);
+
+  }
+
+}
 async function loadRequests(){
 
   const pendingBox =
