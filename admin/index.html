@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title>
-
-<style>
+<title>Coin Rush Admin</title><style>
 body{
   margin:0;
   padding:20px;
@@ -70,50 +67,26 @@ button{
   border-radius:10px;
   margin-top:10px;
 }
-</style>
-</head>
 
-<body>
+.status{
+  font-weight:bold;
+}
+</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
+type="password"
+id="adminKey"
+placeholder="Admin key"
 
-<div class="container">
-
-<h1>🛠️ Coin Rush Admin</h1>
-
-<div class="card" id="loginBox">
-
-<h3>Admin Login</h3>
-
-<input
-  type="password"
-  id="adminKey"
-  placeholder="Admin key"
->
+«»
 
 <button class="login" onclick="login()">
 🔐 LOGIN
-</button>
-
-<p id="loginMessage"></p>
-
-</div>
-
-<div class="card" id="panel" style="display:none">
-
-<h2>💰 Withdrawal Requests</h2>
-
-<button onclick="loadRequests()">
-🔄 REFRESH REQUESTS
-</button>
-
-<div id="requests">
+</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>💰 Withdrawal Management</h2><button onclick="loadRequests()">
+🔄 REFRESH
+</button><h3>⏳ Pending Withdrawals</h3><div id="pendingRequests">
 Loading...
-</div>
-
-</div>
-
-</div>
-
-<script>
+</div><h3>📜 Withdrawal History</h3><div id="history">
+Loading...
+</div></div></div><script>
 
 const API = "https://coin-rush-nxeb.onrender.com";
 
@@ -140,15 +113,19 @@ function login(){
 
 async function loadRequests(){
 
-  const box =
-    document.getElementById("requests");
+  const pendingBox =
+    document.getElementById("pendingRequests");
 
-  box.innerHTML = "⏳ Loading...";
+  const historyBox =
+    document.getElementById("history");
+
+  pendingBox.innerHTML = "⏳ Loading...";
+  historyBox.innerHTML = "⏳ Loading...";
 
   try{
 
     const response = await fetch(
-      API + "/api/admin/withdrawals",
+      API + "/api/admin/withdrawals/all",
       {
         headers:{
           "x-admin-key": adminKey
@@ -173,59 +150,115 @@ async function loadRequests(){
       "block";
 
 
-    if(!data.withdrawals || data.withdrawals.length === 0){
+    const withdrawals = data.withdrawals || [];
 
-      box.innerHTML = `
+
+    const pending =
+      withdrawals.filter(item => item.status === "pending");
+
+    const history =
+      withdrawals.filter(item => item.status !== "pending");
+
+
+    if(pending.length === 0){
+
+      pendingBox.innerHTML = `
         <div class="request">
           <strong>✅ No pending withdrawals.</strong>
         </div>
       `;
 
-      return;
+    }else{
+
+      pendingBox.innerHTML = pending.map(item => `
+
+        <div class="request">
+
+          <p><strong>ID:</strong> ${item.id}</p>
+
+          <p><strong>Telegram ID:</strong> ${item.telegram_id}</p>
+
+          <p><strong>Amount:</strong> ${item.amount} coins</p>
+
+          <p><strong>Method:</strong> ${item.method}</p>
+
+          <p><strong>Payment Number:</strong> ${item.payment_number}</p>
+
+          <p><strong>Date:</strong> ${item.created_at}</p>
+
+          <p class="status">
+            Status: ⏳ ${item.status}
+          </p>
+
+          <button
+            class="approve"
+            onclick="approve(${item.id})">
+            ✅ APPROVE
+          </button>
+
+          <button
+            class="reject"
+            onclick="reject(${item.id})">
+            ❌ REJECT
+          </button>
+
+        </div>
+
+      `).join("");
+
     }
 
 
-    box.innerHTML = data.withdrawals.map(item => `
+    if(history.length === 0){
 
-      <div class="request">
+      historyBox.innerHTML = `
+        <div class="request">
+          No withdrawal history yet.
+        </div>
+      `;
 
-        <p><strong>ID:</strong> ${item.id}</p>
+    }else{
 
-        <p><strong>Telegram ID:</strong> ${item.telegram_id}</p>
+      historyBox.innerHTML = history.map(item => `
 
-        <p><strong>Amount:</strong> ${item.amount} coins</p>
+        <div class="request">
 
-        <p><strong>Method:</strong> ${item.method}</p>
+          <p><strong>ID:</strong> ${item.id}</p>
 
-        <p><strong>Payment Number:</strong> ${item.payment_number}</p>
+          <p><strong>Telegram ID:</strong> ${item.telegram_id}</p>
 
-        <p><strong>Status:</strong> ${item.status}</p>
+          <p><strong>Amount:</strong> ${item.amount} coins</p>
 
-        <p><strong>Date:</strong> ${item.created_at}</p>
+          <p><strong>Method:</strong> ${item.method}</p>
 
-        <button
-          class="approve"
-          onclick="approve(${item.id})">
-          ✅ APPROVE
-        </button>
+          <p><strong>Payment Number:</strong> ${item.payment_number}</p>
 
-        <button
-          class="reject"
-          onclick="reject(${item.id})">
-          ❌ REJECT
-        </button>
+          <p class="status">
+            Status:
+            ${item.status === "approved"
+              ? "✅ APPROVED"
+              : "❌ REJECTED"}
+          </p>
 
-      </div>
+          <p><strong>Requested:</strong> ${item.created_at}</p>
 
-    `).join("");
+          <p><strong>Processed:</strong> ${item.processed_at || "N/A"}</p>
+
+        </div>
+
+      `).join("");
+
+    }
 
   }catch(error){
 
-    box.innerHTML = `
+    pendingBox.innerHTML = `
       <div class="request">
         ❌ Connection error.
       </div>
     `;
+
+    historyBox.innerHTML = "";
 
   }
 
@@ -315,7 +348,5 @@ async function reject(id){
 
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
