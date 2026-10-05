@@ -1,471 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush</title>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
 
-<style>
-*{
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
-}
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
 
-body{
-  margin:0;
-  min-height:100vh;
-  color:#fff;
-  background:
-    radial-gradient(circle at top,#243b75 0,#111827 45%,#080d18 100%);
-}
+  <title>Coin Rush</title>
 
-.container{
-  max-width:520px;
-  margin:auto;
-  padding:16px;
-}
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-/* HEADER */
+  <style>
 
-.hero{
-  text-align:center;
-  padding:20px 10px 16px;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.logo{
-  font-size:42px;
-  margin-bottom:5px;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
 
-.hero h1{
-  margin:0;
-  font-size:30px;
-  letter-spacing:.5px;
-}
+    .container {
+      width: 100%;
+      max-width: 520px;
+      margin: auto;
+      padding: 15px;
+    }
 
-.hero p{
-  margin:7px 0 0;
-  color:#aeb9d4;
-  font-size:14px;
-}
+    .header {
+      text-align: center;
+      padding: 18px 10px;
+    }
 
-/* CARDS */
+    .logo {
+      font-size: 30px;
+      font-weight: 900;
+      color: #facc15;
+    }
 
-.card{
-  background:rgba(255,255,255,.075);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:20px;
-  padding:17px;
-  margin-bottom:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.18);
-  backdrop-filter:blur(10px);
-}
+    .subtitle {
+      color: #94a3b8;
+      margin-top: 5px;
+      font-size: 14px;
+    }
 
-.card h3{
-  margin:0 0 12px;
-  font-size:18px;
-}
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
 
-/* PLAYER */
+    h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
 
-.player{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
+    .coins {
+      text-align: center;
+      font-size: 38px;
+      font-weight: 900;
+      color: #facc15;
+      margin: 10px 0;
+    }
 
-.avatar{
-  width:48px;
-  height:48px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#facc15,#f97316);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-}
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
 
-.player-name{
-  font-size:17px;
-  font-weight:bold;
-}
+    .stat {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
 
-.connection{
-  color:#6ee7b7;
-  font-size:12px;
-  margin-top:3px;
-}
+    .stat-title {
+      color: #94a3b8;
+      font-size: 12px;
+    }
 
-/* STATS */
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
 
-.stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
+    .xp-bar {
+      height: 10px;
+      background: #0f172a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
 
-.stat{
-  background:rgba(0,0,0,.22);
-  border-radius:15px;
-  padding:14px;
-  text-align:center;
-}
+    .xp-progress {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.3s;
+    }
 
-.stat-icon{
-  font-size:20px;
-}
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px;
+      margin-top: 9px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
 
-.stat-label{
-  color:#9ca9c5;
-  font-size:12px;
-  margin-top:3px;
-}
+    button.reward {
+      background: #16a34a;
+    }
 
-.stat strong{
-  display:block;
-  font-size:24px;
-  margin-top:4px;
-}
+    button.gold {
+      background: #ca8a04;
+    }
 
-/* XP */
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-.xp-header{
-  display:flex;
-  justify-content:space-between;
-  margin-top:16px;
-  font-size:13px;
-  color:#cbd5e1;
-}
+    input,
+    select {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      font-size: 15px;
+    }
 
-.progress{
-  height:11px;
-  background:rgba(255,255,255,.12);
-  border-radius:20px;
-  margin-top:8px;
-  overflow:hidden;
-}
+    .mission {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 13px;
+      margin-top: 10px;
+    }
 
-#xpBar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#facc15,#fb923c);
-  border-radius:20px;
-  transition:width .4s ease;
-}
+    .small {
+      color: #94a3b8;
+      font-size: 13px;
+      line-height: 1.5;
+    }
 
-/* BUTTONS */
+    .message {
+      margin-top: 10px;
+      color: #cbd5e1;
+      font-size: 13px;
+      text-align: center;
+    }
 
-button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:0;
-  border-radius:13px;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:.15s;
-}
+    .leader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 7px;
+    }
 
-button:active{
-  transform:scale(.98);
-}
+    .rank {
+      font-weight: bold;
+      color: #facc15;
+      min-width: 35px;
+    }
 
-.play{
-  background:linear-gradient(135deg,#facc15,#f59e0b);
-  color:#111827;
-  font-size:17px;
-  box-shadow:0 7px 20px rgba(250,204,21,.2);
-}
+    .leader-name {
+      flex: 1;
+      margin-left: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-.reward{
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:white;
-}
+    .leader-coins {
+      font-weight: bold;
+      color: #facc15;
+    }
 
-.withdraw{
-  background:linear-gradient(135deg,#3b82f6,#2563eb);
-  color:white;
-}
+    .referral-box {
+      word-break: break-all;
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-top: 8px;
+    }
 
-.referral{
-  background:linear-gradient(135deg,#8b5cf6,#6d28d9);
-  color:white;
-}
+    .loading {
+      text-align: center;
+      color: #94a3b8;
+      padding: 10px;
+    }
 
-/* MISSION */
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding: 15px;
+    }
 
-.mission{
-  background:rgba(0,0,0,.2);
-  padding:13px;
-  margin-top:9px;
-  border-radius:13px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  color:#e5e7eb;
-}
+  </style>
 
-.mission span{
-  font-size:14px;
-}
-
-.mission strong{
-  color:#facc15;
-  white-space:nowrap;
-}
-
-/* INPUT */
-
-input,
-select{
-  width:100%;
-  padding:13px;
-  margin-top:9px;
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:12px;
-  background:rgba(0,0,0,.25);
-  color:white;
-  outline:none;
-  font-size:14px;
-}
-
-input::placeholder{
-  color:#8995ad;
-}
-
-select option{
-  color:#111827;
-}
-
-/* WALLET */
-
-.wallet{
-  text-align:center;
-  padding:12px;
-  background:rgba(250,204,21,.08);
-  border:1px solid rgba(250,204,21,.15);
-  border-radius:15px;
-  margin-bottom:10px;
-}
-
-.wallet-title{
-  color:#aeb9d4;
-  font-size:13px;
-}
-
-.wallet-coins{
-  font-size:32px;
-  font-weight:bold;
-  color:#facc15;
-  margin-top:3px;
-}
-
-.small{
-  font-size:12px;
-  color:#8995ad;
-}
-
-/* MESSAGE */
-
-.message{
-  text-align:center;
-  margin-top:10px;
-  min-height:20px;
-  font-size:13px;
-  color:#a7f3d0;
-}
-
-/* LEADERBOARD */
-
-.rank{
-  color:#facc15;
-  font-weight:bold;
-}
-
-/* DIVIDER */
-
-.divider{
-  height:1px;
-  background:rgba(255,255,255,.08);
-  margin:14px 0;
-}
-
-/* MOBILE */
-
-@media(max-width:380px){
-  .container{
-    padding:12px;
-  }
-
-  .hero h1{
-    font-size:26px;
-  }
-
-  .stat strong{
-    font-size:21px;
-  }
-}
-</style>
 </head>
+
 
 <body>
 
 <div class="container">
 
+
   <!-- HEADER -->
-  <div class="hero">
-    <div class="logo">🪙</div>
-    <h1>Coin Rush</h1>
-    <p>Play • Earn • Complete Missions</p>
-  </div>
 
-  <!-- PLAYER -->
-  <div class="card">
-    <div class="player">
-      <div class="avatar">👤</div>
+  <div class="header">
 
-      <div>
-        <div class="player-name" id="playerName">
-          Connecting...
-        </div>
-
-        <div class="connection" id="connection">
-          Connecting to server...
-        </div>
-      </div>
+    <div class="logo">
+      🪙 COIN RUSH
     </div>
+
+    <div class="subtitle">
+      Play • Complete missions • Earn coins
+    </div>
+
   </div>
 
-  <!-- STATS -->
+
+  <!-- PROFILE -->
+
   <div class="card">
+
+    <h3>👤 Profile</h3>
+
+    <div
+      id="playerName"
+      class="small"
+    >
+      Loading...
+    </div>
+
+    <div
+      id="coins"
+      class="coins"
+    >
+      0 🪙
+    </div>
+
 
     <div class="stats">
 
       <div class="stat">
-        <div class="stat-icon">🪙</div>
-        <div class="stat-label">COINS</div>
-        <strong id="coins">0</strong>
+
+        <div class="stat-title">
+          LEVEL
+        </div>
+
+        <div
+          id="level"
+          class="stat-value"
+        >
+          1
+        </div>
+
       </div>
 
-      <div class="stat">
-        <div class="stat-icon">⭐</div>
-        <div class="stat-label">LEVEL</div>
-        <strong id="level">1</strong>
-      </div>
 
       <div class="stat">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-label">XP</div>
-        <strong id="xp">0</strong>
+
+        <div class="stat-title">
+          XP
+        </div>
+
+        <div
+          id="xp"
+          class="stat-value"
+        >
+          0
+        </div>
+
       </div>
 
+
       <div class="stat">
-        <div class="stat-icon">🎮</div>
-        <div class="stat-label">PLAYS</div>
-        <strong id="plays">0</strong>
+
+        <div class="stat-title">
+          PLAYS
+        </div>
+
+        <div
+          id="plays"
+          class="stat-value"
+        >
+          0
+        </div>
+
       </div>
 
     </div>
 
-    <div class="xp-header">
-      <span>⭐ Level Progress</span>
-      <span id="xpText">0%</span>
+
+    <div
+      class="small"
+      style="margin-top:12px"
+    >
+      XP Progress
     </div>
 
-    <div class="progress">
-      <div id="xpBar"></div>
+
+    <div class="xp-bar">
+
+      <div
+        id="xpProgress"
+        class="xp-progress"
+      ></div>
+
     </div>
 
-    <button class="play" onclick="playGame()">
-      🎮 PLAY & EARN  +10 🪙
-    </button>
 
-    <div class="message" id="gameMessage"></div>
+    <div
+      id="xpText"
+      class="small"
+      style="margin-top:6px"
+    >
+      0 / 10 XP
+    </div>
 
   </div>
 
-  <!-- DAILY -->
+
+  <!-- PLAY -->
+
+  <div class="card">
+
+    <h3>🎮 Play Game</h3>
+
+    <p class="small">
+      Play the game to earn coins and XP.
+    </p>
+
+    <button
+      id="playBtn"
+      class="reward"
+      onclick="playGame()"
+    >
+      ▶ PLAY +10 COINS
+    </button>
+
+    <div
+      id="playMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+
+  <!-- DAILY REWARD -->
+
   <div class="card">
 
     <h3>🎁 Daily Reward</h3>
 
     <p class="small">
-      Come back every day and claim your reward.
+      Claim your daily reward once per day.
     </p>
 
-    <button class="reward" onclick="dailyReward()">
+    <button
+      id="dailyBtn"
+      class="gold"
+      onclick="dailyReward()"
+    >
       🎁 CLAIM 100 COINS
     </button>
 
-  </div>
-
-  <!-- MISSIONS -->
-  <div class="card">
-
-    <h3>🎯 Missions</h3>
-
-    <div class="mission">
-      <span>🎮 Play 5 times</span>
-      <strong id="mission5">0 / 5</strong>
-    </div>
-
-    <div class="mission">
-      <span>🎮 Play 10 times</span>
-      <strong id="mission10">0 / 10</strong>
-    </div>
-
-    <div class="mission">
-      <span>⭐ Reach Level 5</span>
-      <strong id="missionLevel">Level 1 / 5</strong>
-    </div>
+    <div
+      id="dailyMessage"
+      class="message"
+    ></div>
 
   </div>
 
-  <!-- REFERRAL -->
+
+  <!-- SPONSORED MISSIONS -->
+
   <div class="card">
 
-    <h3>👥 Invite Friends</h3>
+    <h3>
+      💼 Sponsored Missions
+    </h3>
 
     <p class="small">
-      Invite friends using your referral link.
+      Complete available sponsored missions
+      and submit them for review.
     </p>
 
-    <input id="refLink" readonly>
+    <div id="sponsoredMissions">
+      Loading missions...
+    </div>
 
-    <button class="referral" onclick="copyReferral()">
+  </div>
+
+
+  <!-- REFERRAL -->
+
+  <div class="card">
+
+    <h3>👥 Referral</h3>
+
+    <p class="small">
+      Share your Coin Rush referral link
+      with friends.
+    </p>
+
+    <div
+      id="referralLink"
+      class="referral-box"
+    >
+      Loading referral link...
+    </div>
+
+    <button
+      onclick="copyReferral()"
+    >
       📋 COPY REFERRAL LINK
     </button>
 
   </div>
 
-  <!-- WALLET -->
+
+  <!-- WITHDRAW -->
+
   <div class="card">
 
-    <h3>💰 Reward Wallet</h3>
-
-    <div class="wallet">
-      <div class="wallet-title">
-        Available Balance
-      </div>
-
-      <div class="wallet-coins">
-        🪙 <span id="walletCoins">0</span>
-      </div>
-    </div>
+    <h3>💰 Withdraw</h3>
 
     <p class="small">
-      Minimum withdrawal: 100 coins
+      Minimum withdrawal: 100 coins.
     </p>
 
-    <select id="withdrawMethod">
+    <input
+      id="withdrawAmount"
+      type="number"
+      min="100"
+      placeholder="Amount of coins"
+    >
 
-      <option value="">
-        Select payment method
-      </option>
+    <select id="withdrawMethod">
 
       <option value="bkash">
         bKash
@@ -478,483 +479,952 @@ select option{
     </select>
 
     <input
-      id="withdrawAmount"
-      type="number"
-      min="100"
-      placeholder="Coin amount"
-    >
-
-    <input
       id="paymentNumber"
-      type="text"
+      type="tel"
       placeholder="bKash/Nagad number"
     >
 
-    <button class="withdraw" onclick="withdrawRequest()">
+    <button
+      class="gold"
+      onclick="withdraw()"
+    >
       💸 REQUEST WITHDRAWAL
     </button>
 
-    <div class="message" id="withdrawMessage"></div>
+    <div
+      id="withdrawMessage"
+      class="message"
+    ></div>
 
   </div>
 
+
   <!-- LEADERBOARD -->
+
   <div class="card">
 
     <h3>🏆 Leaderboard</h3>
 
     <div id="leaderboard">
-      Loading...
+      Loading leaderboard...
     </div>
 
   </div>
 
+
+  <div class="footer">
+    Coin Rush © 2026
+  </div>
+
+
 </div>
+
 
 <script>
 
-const API = "https://coin-rush-nxeb.onrender.com";
+  /* =========================
+     TELEGRAM
+  ========================= */
 
-const tg = window.Telegram.WebApp;
+  const tg =
+    window.Telegram &&
+    window.Telegram.WebApp
+      ? window.Telegram.WebApp
+      : null;
 
-tg.ready();
-tg.expand();
+  if (tg) {
 
-const initData = tg.initData || "";
+    tg.ready();
 
-let currentUser = null;
+    tg.expand();
+
+  }
 
 
-/* =========================
-   SERVER REQUEST
-========================= */
+  /* =========================
+     API
+  ========================= */
 
-async function api(path, options = {}) {
+  const API =
+    "https://coin-rush-nxeb.onrender.com";
 
-  const response = await fetch(API + path, {
 
-    ...options,
+  async function api(
+    endpoint,
+    options = {}
+  ) {
 
-    headers: {
-      "Content-Type": "application/json",
-      "x-telegram-init-data": initData,
+    const headers = {
+
+      "Content-Type":
+        "application/json",
+
       ...(options.headers || {})
+
+    };
+
+
+    if (
+      tg &&
+      tg.initData
+    ) {
+
+      headers[
+        "X-Telegram-Init-Data"
+      ] =
+        tg.initData;
+
     }
 
-  });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Server error");
-  }
-
-  return data;
-}
-
-
-/* =========================
-   LOGIN
-========================= */
-
-async function login() {
-
-  try {
-
-    if (!initData) {
-
-      document.getElementById("connection").textContent =
-        "Open this game from Telegram.";
-
-      return;
-    }
-
-    const data = await api("/api/auth", {
-      method: "POST"
-    });
-
-    if (!data.success) {
-      throw new Error(data.error || "Login failed");
-    }
-
-    currentUser = data.user;
-
-    document.getElementById("playerName").textContent =
-      currentUser.first_name ||
-      currentUser.username ||
-      "Player";
-
-    document.getElementById("connection").textContent =
-      "● Connected";
-
-    createReferralLink();
-
-    await loadProfile();
-    await loadLeaderboard();
-
-  } catch (error) {
-
-    console.error(error);
-
-    document.getElementById("connection").textContent =
-      "Connection failed: " + error.message;
-  }
-}
-
-
-/* =========================
-   PROFILE
-========================= */
-
-async function loadProfile() {
-
-  const data = await api("/api/profile");
-
-  if (!data.success) {
-    throw new Error(data.error || "Profile loading failed");
-  }
-
-  const user = data.user;
-
-  document.getElementById("coins").textContent =
-    user.coins;
-
-  document.getElementById("walletCoins").textContent =
-    user.coins;
-
-  document.getElementById("xp").textContent =
-    user.xp;
-
-  document.getElementById("level").textContent =
-    user.level;
-
-  document.getElementById("plays").textContent =
-    user.plays || 0;
-
-  updateProgress(user);
-}
-
-
-/* =========================
-   XP / MISSIONS
-========================= */
-
-function updateProgress(user) {
-
-  const progress =
-    Number(user.xp_progress || 0);
-
-  document.getElementById("xpBar").style.width =
-    progress + "%";
-
-  document.getElementById("xpText").textContent =
-    Math.round(progress) + "%";
-
-  document.getElementById("missionLevel").textContent =
-    "Level " + user.level + " / 5";
-
-  const totalPlays =
-    Number(user.plays || 0);
-
-  document.getElementById("mission5").textContent =
-    Math.min(totalPlays, 5) + " / 5";
-
-  document.getElementById("mission10").textContent =
-    Math.min(totalPlays, 10) + " / 10";
-}
-
-
-/* =========================
-   PLAY GAME
-========================= */
-
-async function playGame() {
-
-  const message =
-    document.getElementById("gameMessage");
-
-  message.textContent = "Playing...";
-
-  try {
-
-    const data = await api("/api/game/play", {
-      method: "POST"
-    });
-
-    if (!data.success) {
-      throw new Error(data.error || "Game failed");
-    }
-
-    message.textContent =
-      "+" + data.reward +
-      " coins 🎉";
-
-    await loadProfile();
-
-  } catch (error) {
-
-    message.textContent =
-      error.message;
-  }
-}
-
-
-/* =========================
-   DAILY REWARD
-========================= */
-
-async function dailyReward() {
-
-  const message =
-    document.getElementById("gameMessage");
-
-  message.textContent =
-    "Claiming reward...";
-
-  try {
-
-    const data = await api(
-      "/api/reward/daily",
-      {
-        method: "POST"
-      }
-    );
-
-    if (!data.success) {
-      throw new Error(
-        data.error || "Reward failed"
+    const response =
+      await fetch(
+        API + endpoint,
+        {
+          ...options,
+          headers
+        }
       );
-    }
-
-    message.textContent =
-      "+" + data.reward + " coins 🎁";
-
-    await loadProfile();
-
-  } catch (error) {
-
-    message.textContent =
-      error.message;
-  }
-}
 
 
-/* =========================
-   WITHDRAW
-========================= */
+    let data;
 
-async function withdrawRequest() {
 
-  const amount = Number(
-    document.getElementById(
-      "withdrawAmount"
-    ).value
-  );
+    try {
 
-  const method =
-    document.getElementById(
-      "withdrawMethod"
-    ).value;
+      data =
+        await response.json();
 
-  const paymentNumber =
-    document.getElementById(
-      "paymentNumber"
-    ).value.trim();
+    } catch {
 
-  const message =
-    document.getElementById(
-      "withdrawMessage"
-    );
-
-  if (!Number.isInteger(amount) || amount < 100) {
-
-    message.textContent =
-      "Minimum withdrawal is 100 coins.";
-
-    return;
-  }
-
-  if (!method) {
-
-    message.textContent =
-      "Select a payment method.";
-
-    return;
-  }
-
-  if (!paymentNumber) {
-
-    message.textContent =
-      "Enter payment number.";
-
-    return;
-  }
-
-  try {
-
-    const data = await api(
-      "/api/withdraw",
-      {
-        method: "POST",
-
-        body: JSON.stringify({
-          amount: amount,
-          method: method,
-          payment_number: paymentNumber
-        })
-      }
-    );
-
-    if (!data.success) {
       throw new Error(
-        data.error || "Withdrawal failed"
+        "Server returned invalid response"
       );
+
     }
 
-    message.textContent =
-      "Withdrawal request submitted ✓";
 
-    document.getElementById(
-      "withdrawAmount"
-    ).value = "";
+    if (!response.ok) {
 
-    document.getElementById(
-      "paymentNumber"
-    ).value = "";
+      throw new Error(
+        data.error ||
+        "Something went wrong"
+      );
 
-    await loadProfile();
+    }
 
-  } catch (error) {
 
-    message.textContent =
-      error.message;
+    return data;
+
   }
-}
 
 
-/* =========================
-   LEADERBOARD
-========================= */
+  /* =========================
+     LOGIN
+  ========================= */
 
-async function loadLeaderboard() {
+  async function login() {
 
-  try {
+    try {
+
+      if (
+        !tg ||
+        !tg.initData
+      ) {
+
+        document.getElementById(
+          "playerName"
+        ).textContent =
+          "Open this game from Telegram.";
+
+        return;
+
+      }
+
+
+      const data =
+        await api(
+          "/api/auth",
+          {
+            method: "POST"
+          }
+        );
+
+
+      if (!data.success) {
+
+        throw new Error(
+          "Login failed"
+        );
+
+      }
+
+
+      const user =
+        data.user;
+
+
+      document.getElementById(
+        "playerName"
+      ).textContent =
+        user.first_name
+          ? "Hello, " +
+            user.first_name +
+            " 👋"
+          : "Player";
+
+
+      createReferralLink();
+
+
+      await loadProfile();
+
+      await loadLeaderboard();
+
+      await loadSponsoredMissions();
+
+
+    } catch (error) {
+
+      document.getElementById(
+        "playerName"
+      ).textContent =
+        error.message;
+
+    }
+
+  }
+
+
+  /* =========================
+     PROFILE
+  ========================= */
+
+  async function loadProfile() {
 
     const data =
-      await api("/api/leaderboard");
+      await api(
+        "/api/profile"
+      );
+
 
     if (!data.success) {
       return;
     }
+
+
+    const user =
+      data.user;
+
+
+    document.getElementById(
+      "coins"
+    ).textContent =
+      user.coins +
+      " 🪙";
+
+
+    document.getElementById(
+      "level"
+    ).textContent =
+      user.level;
+
+
+    document.getElementById(
+      "xp"
+    ).textContent =
+      user.xp;
+
+
+    document.getElementById(
+      "plays"
+    ).textContent =
+      user.plays;
+
+
+    document.getElementById(
+      "xpProgress"
+    ).style.width =
+      user.xp_progress +
+      "%";
+
+
+    document.getElementById(
+      "xpText"
+    ).textContent =
+      Math.max(
+        0,
+        user.xp -
+        (
+          10 *
+          (
+            (user.level - 1) *
+            user.level
+          ) /
+          2
+        )
+      ) +
+      " / " +
+      user.xp_to_next_level +
+      " XP";
+
+  }
+
+
+  /* =========================
+     PLAY GAME
+  ========================= */
+
+  async function playGame() {
+
+    const button =
+      document.getElementById(
+        "playBtn"
+      );
+
+
+    const message =
+      document.getElementById(
+        "playMessage"
+      );
+
+
+    button.disabled =
+      true;
+
+
+    try {
+
+      const data =
+        await api(
+          "/api/game/play",
+          {
+            method: "POST"
+          }
+        );
+
+
+      if (!data.success) {
+
+        throw new Error(
+          "Play failed"
+        );
+
+      }
+
+
+      message.textContent =
+        "+" +
+        data.reward +
+        " coins • +" +
+        data.xp +
+        " XP";
+
+
+      await loadProfile();
+
+
+    } catch (error) {
+
+      message.textContent =
+        error.message;
+
+    }
+
+
+    button.disabled =
+      false;
+
+  }
+    /* =========================
+     DAILY REWARD
+  ========================= */
+
+  async function dailyReward() {
+
+    const button =
+      document.getElementById(
+        "dailyBtn"
+      );
+
+    const message =
+      document.getElementById(
+        "dailyMessage"
+      );
+
+    button.disabled = true;
+
+    try {
+
+      const data =
+        await api(
+          "/api/reward/daily",
+          {
+            method: "POST"
+          }
+        );
+
+      if (!data.success) {
+
+        throw new Error(
+          data.error ||
+          "Daily reward failed"
+        );
+
+      }
+
+      message.textContent =
+        "+" +
+        data.reward +
+        " coins received! 🎉";
+
+      await loadProfile();
+
+    } catch (error) {
+
+      message.textContent =
+        error.message;
+
+    }
+
+    button.disabled = false;
+
+  }
+
+
+  /* =========================
+     SPONSORED MISSIONS
+  ========================= */
+
+  async function loadSponsoredMissions() {
+
+    const box =
+      document.getElementById(
+        "sponsoredMissions"
+      );
+
+    try {
+
+      const data =
+        await api(
+          "/api/missions"
+        );
+
+      if (!data.success) {
+
+        throw new Error(
+          "Mission loading failed"
+        );
+
+      }
+
+      if (
+        !data.missions ||
+        data.missions.length === 0
+      ) {
+
+        box.innerHTML =
+          `<div class="mission">
+            No sponsored missions available.
+          </div>`;
+
+        return;
+
+      }
+
+      box.innerHTML =
+        data.missions
+          .map(
+            mission => {
+
+              let buttonText =
+                "✅ SUBMIT MISSION";
+
+              let disabled = "";
+
+              if (
+                mission.player_status ===
+                "pending"
+              ) {
+
+                buttonText =
+                  "⏳ UNDER REVIEW";
+
+                disabled =
+                  "disabled";
+
+              }
+
+              if (
+                mission.player_status ===
+                "approved"
+              ) {
+
+                buttonText =
+                  "✓ COMPLETED";
+
+                disabled =
+                  "disabled";
+
+              }
+
+              if (
+                mission.player_status ===
+                "rejected"
+              ) {
+
+                buttonText =
+                  "❌ REJECTED";
+
+                disabled =
+                  "disabled";
+
+              }
+
+              return `
+                <div class="mission">
+
+                  <div
+                    style="
+                      font-size:16px;
+                      font-weight:bold;
+                    "
+                  >
+                    ${escapeHtml(
+                      mission.title
+                    )}
+                  </div>
+
+                  <div
+                    class="small"
+                    style="margin-top:6px"
+                  >
+                    ${escapeHtml(
+                      mission.description
+                    )}
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:9px;
+                      color:#facc15;
+                      font-weight:bold;
+                    "
+                  >
+                    🪙 Reward:
+                    ${mission.reward}
+                    coins
+                  </div>
+
+                  ${
+                    mission.sponsor
+                    ? `
+                      <div
+                        class="small"
+                        style="margin-top:4px"
+                      >
+                        Sponsor:
+                        ${escapeHtml(
+                          mission.sponsor
+                        )}
+                      </div>
+                    `
+                    : ""
+                  }
+
+                  <button
+                    class="reward"
+                    onclick="
+                      submitMission(
+                        ${mission.id}
+                      )
+                    "
+                    ${disabled}
+                  >
+                    ${buttonText}
+                  </button>
+
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+    } catch (error) {
+
+      box.innerHTML =
+        `<div class="mission">
+          Missions unavailable.
+        </div>`;
+
+    }
+
+  }
+
+
+  /* =========================
+     SUBMIT MISSION
+  ========================= */
+
+  async function submitMission(
+    id
+  ) {
+
+    try {
+
+      const data =
+        await api(
+          "/api/missions/" +
+          id +
+          "/claim",
+          {
+            method: "POST"
+          }
+        );
+
+      if (!data.success) {
+
+        throw new Error(
+          data.error ||
+          "Mission submission failed"
+        );
+
+      }
+
+      alert(
+        "Mission submitted for review ✓"
+      );
+
+      await loadSponsoredMissions();
+
+    } catch (error) {
+
+      alert(
+        error.message
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     REFERRAL
+  ========================= */
+
+  function createReferralLink() {
+
+    if (
+      !tg ||
+      !tg.initDataUnsafe ||
+      !tg.initDataUnsafe.user
+    ) {
+
+      return;
+
+    }
+
+    const telegramId =
+      tg.initDataUnsafe.user.id;
+
+    const link =
+      "https://t.me/macro_0bot?start=ref_" +
+      telegramId;
+
+    document.getElementById(
+      "referralLink"
+    ).textContent =
+      link;
+
+  }
+
+
+  function copyReferral() {
+
+    const box =
+      document.getElementById(
+        "referralLink"
+      );
+
+    const text =
+      box.textContent;
+
+    if (
+      navigator.clipboard &&
+      navigator.clipboard.writeText
+    ) {
+
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+
+          alert(
+            "Referral link copied ✓"
+          );
+
+        })
+        .catch(() => {
+
+          alert(
+            "Copy failed. Long press the link to copy."
+          );
+
+        });
+
+    } else {
+
+      alert(
+        "Long press the referral link and copy it."
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     WITHDRAW
+  ========================= */
+
+  async function withdraw() {
+
+    const amount =
+      Number(
+        document.getElementById(
+          "withdrawAmount"
+        ).value
+      );
+
+    const method =
+      document.getElementById(
+        "withdrawMethod"
+      ).value;
+
+    const paymentNumber =
+      document.getElementById(
+        "paymentNumber"
+      ).value.trim();
+
+    const message =
+      document.getElementById(
+        "withdrawMessage"
+      );
+
+
+    if (
+      !Number.isInteger(amount) ||
+      amount < 100
+    ) {
+
+      message.textContent =
+        "Minimum withdrawal is 100 coins.";
+
+      return;
+
+    }
+
+
+    if (!paymentNumber) {
+
+      message.textContent =
+        "Payment number required.";
+
+      return;
+
+    }
+
+
+    try {
+
+      const data =
+        await api(
+          "/api/withdraw",
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              amount: amount,
+              method: method,
+              payment_number:
+                paymentNumber
+            })
+
+          }
+        );
+
+
+      if (!data.success) {
+
+        throw new Error(
+          data.error ||
+          "Withdrawal failed"
+        );
+
+      }
+
+
+      message.textContent =
+        "Withdrawal request submitted ✓";
+
+
+      document.getElementById(
+        "withdrawAmount"
+      ).value = "";
+
+
+      document.getElementById(
+        "paymentNumber"
+      ).value = "";
+
+
+      await loadProfile();
+
+
+    } catch (error) {
+
+      message.textContent =
+        error.message;
+
+    }
+
+  }
+
+
+  /* =========================
+     LEADERBOARD
+  ========================= */
+
+  async function loadLeaderboard() {
 
     const box =
       document.getElementById(
         "leaderboard"
       );
 
-    if (
-      !data.leaderboard ||
-      data.leaderboard.length === 0
-    ) {
 
-      box.textContent =
-        "No players yet.";
+    try {
 
-      return;
+      const data =
+        await api(
+          "/api/leaderboard"
+        );
+
+
+      if (!data.success) {
+
+        throw new Error(
+          "Leaderboard failed"
+        );
+
+      }
+
+
+      if (
+        !data.leaderboard ||
+        data.leaderboard.length === 0
+      ) {
+
+        box.innerHTML =
+          `<div class="loading">
+            No players yet.
+          </div>`;
+
+        return;
+
+      }
+
+
+      box.innerHTML =
+        data.leaderboard
+          .map(
+            (player, index) => {
+
+              const name =
+                player.first_name ||
+                player.username ||
+                "Player";
+
+
+              return `
+                <div class="leader">
+
+                  <div class="rank">
+                    #${index + 1}
+                  </div>
+
+                  <div class="leader-name">
+                    ${escapeHtml(name)}
+                  </div>
+
+                  <div class="leader-coins">
+                    🪙 ${player.coins}
+                  </div>
+
+                </div>
+              `;
+
+            }
+          )
+          .join("");
+
+
+    } catch (error) {
+
+      box.innerHTML =
+        `<div class="loading">
+          Leaderboard unavailable.
+        </div>`;
+
     }
 
-    box.innerHTML =
-      data.leaderboard
-        .map((user, index) => {
-
-          const name =
-            user.first_name ||
-            user.username ||
-            "Player";
-
-          return `
-            <div class="mission">
-              <span>
-                <span class="rank">#${index + 1}</span>
-                — ${name}
-              </span>
-
-              <strong>
-                ${user.coins} 🪙
-              </strong>
-            </div>
-          `;
-
-        })
-        .join("");
-
-  } catch (error) {
-
-    document.getElementById(
-      "leaderboard"
-    ).textContent =
-      "Leaderboard unavailable.";
-  }
-}
-
-
-/* =========================
-   REFERRAL
-========================= */
-
-function createReferralLink() {
-
-  if (!currentUser) {
-    return;
   }
 
-  const link =
-    "https://t.me/macro_0bot?start=ref_" +
-    currentUser.telegram_id;
 
-  document.getElementById(
-    "refLink"
-  ).value = link;
-}
+  /* =========================
+     HTML ESCAPE
+  ========================= */
 
+  function escapeHtml(value) {
 
-function copyReferral() {
+    return String(value)
 
-  const input =
-    document.getElementById(
-      "refLink"
-    );
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
 
-  input.select();
-  input.setSelectionRange(
-    0,
-    99999
-  );
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
 
-  try {
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
 
-    document.execCommand("copy");
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
 
-    alert(
-      "Referral link copied!"
-    );
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
 
-  } catch {
-
-    alert(
-      "Copy failed. Long press the link to copy."
-    );
   }
-}
 
 
-/* =========================
-   START
-========================= */
+  /* =========================
+     START
+  ========================= */
 
-login();
+  login();
 
 </script>
 
 </body>
-  </html>
+
+</html>
