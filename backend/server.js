@@ -4,6 +4,18 @@ const crypto = require("crypto");
 const db = require("./database");
 
 const app = express();
+function adminAuth(req, res, next) {
+  const key = req.headers["x-admin-key"];
+
+  if (!key || key !== process.env.ADMIN_KEY) {
+    return res.status(401).json({
+      success: false,
+      error: "Admin authentication failed"
+    });
+  }
+
+  next();
+}
 app.use(cors());
 app.use(express.json());
 
