@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const db = require("./database");
 
 const app = express();
+
 function adminAuth(req, res, next) {
   const key = req.headers["x-admin-key"];
 
@@ -16,6 +17,7 @@ function adminAuth(req, res, next) {
 
   next();
 }
+
 app.use(cors());
 app.use(express.json());
 
@@ -86,6 +88,11 @@ function auth(req, res, next) {
   next();
 }
 
+
+/* =========================
+   AUTH
+========================= */
+
 app.post("/api/auth", auth, (req, res) => {
   const user = req.telegramUser;
 
@@ -122,11 +129,17 @@ app.post("/api/auth", auth, (req, res) => {
   );
 });
 
+
+/* =========================
+   PROFILE
+========================= */
+
 app.get("/api/profile", auth, (req, res) => {
   const telegramId = String(req.telegramUser.id);
 
   db.get(
-    `SELECT telegram_id, username, first_name, coins, xp, level
+    `SELECT telegram_id, username, first_name,
+            coins, xp, level, plays
      FROM users
      WHERE telegram_id = ?`,
     [telegramId],
@@ -145,26 +158,53 @@ app.get("/api/profile", auth, (req, res) => {
         });
       }
 
+      const currentLevel = row.level;
+
+      const xpNeededForNextLevel = currentLevel * 10;
+
+      const xpBeforeCurrentLevel =
+        10 * ((currentLevel - 1) * currentLevel) / 2;
+
+      const currentLevelXP =
+        row.xp - xpBeforeCurrentLevel;
+
+      const xpProgress = Math.min(
+        Math.max(
+          (currentLevelXP / xpNeededForNextLevel) * 100,
+          0
+        ),
+        100
+      );
+
       res.json({
         success: true,
-        user: row
+        user: {
+          ...row,
+          xp_to_next_level: xpNeededForNextLevel,
+          xp_progress: xpProgress
+        }
       });
     }
   );
 });
 
+
+/* =========================
+   PLAY GAME
+========================= */
+
 app.post("/api/game/play", auth, (req, res) => {
   const telegramId = String(req.telegramUser.id);
 
-  const reward = 10 + Math.floor(Math.random() * 21);
+  // Fixed reward
+  const reward = 10;
 
-  db.run(
-    `UPDATE users
-     SET coins = coins + ?,
-         xp = xp + 1
+  db.get(
+    `SELECT xp, level, plays
+     FROM users
      WHERE telegram_id = ?`,
-    [reward, telegramId],
-    function (err) {
+    [telegramId],
+    (err, user) => {
       if (err) {
         return res.status(500).json({
           success: false,
@@ -172,20 +212,121 @@ app.post("/api/game/play", auth, (req, res) => {
         });
       }
 
-      db.run(
-        `INSERT INTO game_events
-        (telegram_id, event_type, coins)
-        VALUES (?, ?, ?)`,
-        [telegramId, "play", reward]
-      );
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: "User not found"
+        });
+      }
 
-      res.json({
-        success: true,
-        reward
-      });
+      const newXP = user.xp + 1;
+      const newPlays = user.plays + 1;
+
+      /*
+        Progressive XP system:
+
+        Level 1 -> 2 = 10 XP
+        Level 2 -> 3 = 20 XP
+        Level 3 -> 4 = 30 XP
+        Level 4 -> 5 = 40 XP
+        Level 5 -> 6 = 50 XP
+
+        Total XP:
+        Level 1 = 0
+        Level 2 = 10
+        Level 3 = 30
+        Level 4 = 60
+        Level 5 = 100
+        Level 6 = 150
+      */
+
+      let newLevel = 1;
+
+      while (
+        10 * ((newLevel - 1) * newLevel) / 2 <= newXP
+      ) {
+        newLevel++;
+
+        if (newLevel > 100) {
+          newLevel = 100;
+          break;
+        }
+      }
+
+      newLevel--;
+
+      if (newLevel < 1) {
+        newLevel = 1;
+      }
+
+      db.run(
+        `UPDATE users
+         SET coins = coins + ?,
+             xp = ?,
+             level = ?,
+             plays = ?
+         WHERE telegram_id = ?`,
+        [
+          reward,
+          newXP,
+          newLevel,
+          newPlays,
+          telegramId
+        ],
+        function (updateErr) {
+          if (updateErr) {
+            return res.status(500).json({
+              success: false,
+              error: updateErr.message
+            });
+          }
+
+          db.run(
+            `INSERT INTO game_events
+            (telegram_id, event_type, coins)
+            VALUES (?, ?, ?)`,
+            [
+              telegramId,
+              "play",
+              reward
+            ]
+          );
+
+          const xpNeededForNextLevel = newLevel * 10;
+
+          const xpBeforeCurrentLevel =
+            10 * ((newLevel - 1) * newLevel) / 2;
+
+          const currentLevelXP =
+            newXP - xpBeforeCurrentLevel;
+
+          const xpProgress = Math.min(
+            Math.max(
+              (currentLevelXP / xpNeededForNextLevel) * 100,
+              0
+            ),
+            100
+          );
+
+          res.json({
+            success: true,
+            reward,
+            xp: newXP,
+            level: newLevel,
+            plays: newPlays,
+            xp_to_next_level: xpNeededForNextLevel,
+            xp_progress: xpProgress
+          });
+        }
+      );
     }
   );
 });
+
+
+/* =========================
+   DAILY REWARD
+========================= */
 
 app.post("/api/reward/daily", auth, (req, res) => {
   const telegramId = String(req.telegramUser.id);
@@ -219,6 +360,11 @@ app.post("/api/reward/daily", auth, (req, res) => {
     }
   );
 });
+
+
+/* =========================
+   WITHDRAW
+========================= */
 
 app.post("/api/withdraw", auth, (req, res) => {
   const telegramId = String(req.telegramUser.id);
@@ -283,7 +429,12 @@ app.post("/api/withdraw", auth, (req, res) => {
             `INSERT INTO withdrawals
             (telegram_id, amount, method, payment_number)
             VALUES (?, ?, ?, ?)`,
-            [telegramId, amount, method, paymentNumber],
+            [
+              telegramId,
+              amount,
+              method,
+              paymentNumber
+            ],
             function (insertErr) {
               if (insertErr) {
                 return res.status(500).json({
@@ -304,6 +455,11 @@ app.post("/api/withdraw", auth, (req, res) => {
     }
   );
 });
+
+
+/* =========================
+   LEADERBOARD
+========================= */
 
 app.get("/api/leaderboard", (req, res) => {
   db.all(
@@ -327,9 +483,16 @@ app.get("/api/leaderboard", (req, res) => {
     }
   );
 });
+
+
+/* =========================
+   ADMIN - PENDING
+========================= */
+
 app.get("/api/admin/withdrawals", adminAuth, (req, res) => {
   db.all(
-    `SELECT id, telegram_id, amount, method, payment_number, status, created_at
+    `SELECT id, telegram_id, amount, method,
+            payment_number, status, created_at
      FROM withdrawals
      WHERE status = 'pending'
      ORDER BY created_at DESC`,
@@ -349,136 +512,175 @@ app.get("/api/admin/withdrawals", adminAuth, (req, res) => {
     }
   );
 });
-app.post("/api/admin/withdrawals/:id/approve", adminAuth, (req, res) => {
-  const id = Number(req.params.id);
 
-  if (!Number.isInteger(id)) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid withdrawal ID"
-    });
-  }
 
-  db.run(
-    `UPDATE withdrawals
-     SET status = 'approved',
-         processed_at = CURRENT_TIMESTAMP
-     WHERE id = ? AND status = 'pending'`,
-    [id],
-    function (err) {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          error: err.message
-        });
-      }
+/* =========================
+   ADMIN - APPROVE
+========================= */
 
-      if (this.changes === 0) {
-        return res.status(404).json({
-          success: false,
-          error: "Withdrawal not found or already processed"
-        });
-      }
+app.post(
+  "/api/admin/withdrawals/:id/approve",
+  adminAuth,
+  (req, res) => {
+    const id = Number(req.params.id);
 
-      res.json({
-        success: true,
-        message: "Withdrawal approved"
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid withdrawal ID"
       });
     }
-  );
-});
 
+    db.run(
+      `UPDATE withdrawals
+       SET status = 'approved',
+           processed_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND status = 'pending'`,
+      [id],
+      function (err) {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
 
-app.post("/api/admin/withdrawals/:id/reject", adminAuth, (req, res) => {
-  const id = Number(req.params.id);
+        if (this.changes === 0) {
+          return res.status(404).json({
+            success: false,
+            error: "Withdrawal not found or already processed"
+          });
+        }
 
-  if (!Number.isInteger(id)) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid withdrawal ID"
-    });
+        res.json({
+          success: true,
+          message: "Withdrawal approved"
+        });
+      }
+    );
   }
+);
 
-  db.get(
-    `SELECT telegram_id, amount
-     FROM withdrawals
-     WHERE id = ? AND status = 'pending'`,
-    [id],
-    (err, withdrawal) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          error: err.message
-        });
-      }
 
-      if (!withdrawal) {
-        return res.status(404).json({
-          success: false,
-          error: "Withdrawal not found or already processed"
-        });
-      }
+/* =========================
+   ADMIN - REJECT
+========================= */
 
-      db.run(
-        `UPDATE users
-         SET coins = coins + ?
-         WHERE telegram_id = ?`,
-        [withdrawal.amount, withdrawal.telegram_id],
-        function (refundErr) {
-          if (refundErr) {
-            return res.status(500).json({
-              success: false,
-              error: refundErr.message
-            });
-          }
+app.post(
+  "/api/admin/withdrawals/:id/reject",
+  adminAuth,
+  (req, res) => {
+    const id = Number(req.params.id);
 
-          db.run(
-            `UPDATE withdrawals
-             SET status = 'rejected',
-                 processed_at = CURRENT_TIMESTAMP
-             WHERE id = ?`,
-            [id],
-            function (updateErr) {
-              if (updateErr) {
-                return res.status(500).json({
-                  success: false,
-                  error: updateErr.message
-                });
-              }
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid withdrawal ID"
+      });
+    }
 
-              res.json({
-                success: true,
-                message: "Withdrawal rejected and coins refunded"
+    db.get(
+      `SELECT telegram_id, amount
+       FROM withdrawals
+       WHERE id = ? AND status = 'pending'`,
+      [id],
+      (err, withdrawal) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        if (!withdrawal) {
+          return res.status(404).json({
+            success: false,
+            error: "Withdrawal not found or already processed"
+          });
+        }
+
+        db.run(
+          `UPDATE users
+           SET coins = coins + ?
+           WHERE telegram_id = ?`,
+          [
+            withdrawal.amount,
+            withdrawal.telegram_id
+          ],
+          function (refundErr) {
+            if (refundErr) {
+              return res.status(500).json({
+                success: false,
+                error: refundErr.message
               });
             }
-          );
+
+            db.run(
+              `UPDATE withdrawals
+               SET status = 'rejected',
+                   processed_at = CURRENT_TIMESTAMP
+               WHERE id = ?`,
+              [id],
+              function (updateErr) {
+                if (updateErr) {
+                  return res.status(500).json({
+                    success: false,
+                    error: updateErr.message
+                  });
+                }
+
+                res.json({
+                  success: true,
+                  message:
+                    "Withdrawal rejected and coins refunded"
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+);
+
+
+/* =========================
+   ADMIN - HISTORY
+========================= */
+
+app.get(
+  "/api/admin/withdrawals/all",
+  adminAuth,
+  (req, res) => {
+    db.all(
+      `SELECT id, telegram_id, amount, method,
+              payment_number, status,
+              created_at, processed_at
+       FROM withdrawals
+       ORDER BY created_at DESC`,
+      [],
+      (err, rows) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
         }
-      );
-    }
-  );
-});
-app.get("/api/admin/withdrawals/all", adminAuth, (req, res) => {
-  db.all(
-    `SELECT id, telegram_id, amount, method, payment_number,
-            status, created_at, processed_at
-     FROM withdrawals
-     ORDER BY created_at DESC`,
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          error: err.message
+
+        res.json({
+          success: true,
+          withdrawals: rows
         });
       }
+    );
+  }
+);
 
-      res.json({
-        success: true,
-        withdrawals: rows
-      });
-    }
-  );
-});
+
+/* =========================
+   ADMIN - STATS
+========================= */
+
 app.get("/api/admin/stats", adminAuth, (req, res) => {
   const stats = {};
 
@@ -498,7 +700,8 @@ app.get("/api/admin/stats", adminAuth, (req, res) => {
       db.get(
         `SELECT
           COUNT(*) AS total_withdrawals,
-          COALESCE(SUM(amount), 0) AS total_withdrawal_coins
+          COALESCE(SUM(amount), 0)
+          AS total_withdrawal_coins
          FROM withdrawals`,
         [],
         (err, withdrawals) => {
@@ -509,7 +712,9 @@ app.get("/api/admin/stats", adminAuth, (req, res) => {
             });
           }
 
-          stats.total_withdrawals = withdrawals.total_withdrawals;
+          stats.total_withdrawals =
+            withdrawals.total_withdrawals;
+
           stats.total_withdrawal_coins =
             withdrawals.total_withdrawal_coins;
 
@@ -541,7 +746,8 @@ app.get("/api/admin/stats", adminAuth, (req, res) => {
                     });
                   }
 
-                  stats.approved = approved.approved;
+                  stats.approved =
+                    approved.approved;
 
                   db.get(
                     `SELECT COUNT(*) AS rejected
@@ -556,7 +762,8 @@ app.get("/api/admin/stats", adminAuth, (req, res) => {
                         });
                       }
 
-                      stats.rejected = rejected.rejected;
+                      stats.rejected =
+                        rejected.rejected;
 
                       res.json({
                         success: true,
@@ -573,6 +780,14 @@ app.get("/api/admin/stats", adminAuth, (req, res) => {
     }
   );
 });
+
+
+/* =========================
+   START SERVER
+========================= */
+
 app.listen(PORT, () => {
-  console.log(`Coin Rush backend running on port ${PORT}`);
+  console.log(
+    `Coin Rush backend running on port ${PORT}`
+  );
 });
