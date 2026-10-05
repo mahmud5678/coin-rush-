@@ -4,7 +4,6 @@ const crypto = require("crypto");
 const db = require("./database");
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -16,6 +15,7 @@ app.use(express.json());
 ========================= */
 
 function adminAuth(req, res, next) {
+
   const key = req.headers["x-admin-key"];
 
   if (!key || key !== process.env.ADMIN_KEY) {
@@ -34,11 +34,13 @@ function adminAuth(req, res, next) {
 ========================= */
 
 app.get("/", (req, res) => {
+
   res.json({
     success: true,
     app: "Coin Rush Backend",
     status: "online"
   });
+
 });
 
 
@@ -47,6 +49,7 @@ app.get("/", (req, res) => {
 ========================= */
 
 function verifyTelegram(initData) {
+
   if (!initData) return null;
 
   const botToken = process.env.BOT_TOKEN;
@@ -96,15 +99,20 @@ function verifyTelegram(initData) {
 ========================= */
 
 function auth(req, res, next) {
-  const initData = req.headers["x-telegram-init-data"];
 
-  const user = verifyTelegram(initData);
+  const initData =
+    req.headers["x-telegram-init-data"];
+
+  const user =
+    verifyTelegram(initData);
 
   if (!user) {
+
     return res.status(401).json({
       success: false,
       error: "Telegram verification failed"
     });
+
   }
 
   req.telegramUser = user;
@@ -134,13 +142,15 @@ app.post("/api/auth", auth, (req, res) => {
       user.username || null,
       user.first_name || null
     ],
-    function (err) {
+    function(err) {
 
       if (err) {
+
         return res.status(500).json({
           success: false,
           error: err.message
         });
+
       }
 
       res.json({
@@ -154,6 +164,7 @@ app.post("/api/auth", auth, (req, res) => {
 
     }
   );
+
 });
 
 
@@ -163,7 +174,8 @@ app.post("/api/auth", auth, (req, res) => {
 
 app.get("/api/profile", auth, (req, res) => {
 
-  const telegramId = String(req.telegramUser.id);
+  const telegramId =
+    String(req.telegramUser.id);
 
   db.get(
     `SELECT
@@ -180,20 +192,25 @@ app.get("/api/profile", auth, (req, res) => {
     (err, row) => {
 
       if (err) {
+
         return res.status(500).json({
           success: false,
           error: err.message
         });
+
       }
 
       if (!row) {
+
         return res.status(404).json({
           success: false,
           error: "User not found"
         });
+
       }
 
-      const currentLevel = row.level;
+      const currentLevel =
+        row.level;
 
       const xpNeededForNextLevel =
         currentLevel * 10;
@@ -206,37 +223,40 @@ app.get("/api/profile", auth, (req, res) => {
       const currentLevelXP =
         row.xp - xpBeforeCurrentLevel;
 
-      const xpProgress = Math.min(
-        Math.max(
-          (currentLevelXP / xpNeededForNextLevel) * 100,
-          0
-        ),
-        100
-      );
+      const xpProgress =
+        Math.min(
+          Math.max(
+            (currentLevelXP /
+              xpNeededForNextLevel) * 100,
+            0
+          ),
+          100
+        );
 
       res.json({
         success: true,
         user: {
           ...row,
-          xp_to_next_level: xpNeededForNextLevel,
-          xp_progress: xpProgress
+          xp_to_next_level:
+            xpNeededForNextLevel,
+          xp_progress:
+            xpProgress
         }
       });
 
     }
   );
+
 });
-
-
 /* =========================
    PLAY GAME
 ========================= */
 
 app.post("/api/game/play", auth, (req, res) => {
 
-  const telegramId = String(req.telegramUser.id);
+  const telegramId =
+    String(req.telegramUser.id);
 
-  // Fixed reward
   const reward = 10;
 
   db.get(
@@ -262,25 +282,6 @@ app.post("/api/game/play", auth, (req, res) => {
 
       const newXP = user.xp + 1;
       const newPlays = user.plays + 1;
-
-      /*
-        Progressive XP:
-
-        Level 1 -> 2 = 10 XP
-        Level 2 -> 3 = 20 XP
-        Level 3 -> 4 = 30 XP
-        Level 4 -> 5 = 40 XP
-        Level 5 -> 6 = 50 XP
-
-        Total XP:
-
-        Level 1 = 0
-        Level 2 = 10
-        Level 3 = 30
-        Level 4 = 60
-        Level 5 = 100
-        Level 6 = 150
-      */
 
       let newLevel = 1;
 
@@ -318,7 +319,7 @@ app.post("/api/game/play", auth, (req, res) => {
           newPlays,
           telegramId
         ],
-        function (updateErr) {
+        function(updateErr) {
 
           if (updateErr) {
             return res.status(500).json({
@@ -338,25 +339,25 @@ app.post("/api/game/play", auth, (req, res) => {
             ]
           );
 
-          const xpNeededForNextLevel =
+          const xpNeeded =
             newLevel * 10;
 
-          const xpBeforeCurrentLevel =
+          const xpBefore =
             10 *
             ((newLevel - 1) * newLevel) /
             2;
 
-          const currentLevelXP =
-            newXP - xpBeforeCurrentLevel;
+          const currentXP =
+            newXP - xpBefore;
 
-          const xpProgress = Math.min(
-            Math.max(
-              (currentLevelXP /
-                xpNeededForNextLevel) * 100,
-              0
-            ),
-            100
-          );
+          const progress =
+            Math.min(
+              Math.max(
+                (currentXP / xpNeeded) * 100,
+                0
+              ),
+              100
+            );
 
           res.json({
             success: true,
@@ -364,10 +365,8 @@ app.post("/api/game/play", auth, (req, res) => {
             xp: newXP,
             level: newLevel,
             plays: newPlays,
-            xp_to_next_level:
-              xpNeededForNextLevel,
-            xp_progress:
-              xpProgress
+            xp_to_next_level: xpNeeded,
+            xp_progress: progress
           });
 
         }
@@ -375,17 +374,18 @@ app.post("/api/game/play", auth, (req, res) => {
 
     }
   );
+
 });
 
 
 /* =========================
    DAILY REWARD
-   ONCE PER DAY
 ========================= */
 
 app.post("/api/reward/daily", auth, (req, res) => {
 
-  const telegramId = String(req.telegramUser.id);
+  const telegramId =
+    String(req.telegramUser.id);
 
   const reward = 100;
 
@@ -411,7 +411,8 @@ app.post("/api/reward/daily", auth, (req, res) => {
         const lastDate =
           new Date(lastReward.created_at);
 
-        const now = new Date();
+        const now =
+          new Date();
 
         const sameDay =
           lastDate.getFullYear() === now.getFullYear() &&
@@ -434,7 +435,7 @@ app.post("/api/reward/daily", auth, (req, res) => {
          SET coins = coins + ?
          WHERE telegram_id = ?`,
         [reward, telegramId],
-        function (updateErr) {
+        function(updateErr) {
 
           if (updateErr) {
             return res.status(500).json({
@@ -452,7 +453,7 @@ app.post("/api/reward/daily", auth, (req, res) => {
               "daily_reward",
               reward
             ],
-            function (insertErr) {
+            function(insertErr) {
 
               if (insertErr) {
                 return res.status(500).json({
@@ -474,7 +475,174 @@ app.post("/api/reward/daily", auth, (req, res) => {
 
     }
   );
+
 });
+
+
+/* =========================
+   SPONSORED MISSIONS
+   PLAYER - LIST
+========================= */
+
+app.get(
+  "/api/missions",
+  auth,
+  (req, res) => {
+
+    const telegramId =
+      String(req.telegramUser.id);
+
+    db.all(
+      `SELECT
+        m.id,
+        m.title,
+        m.description,
+        m.reward,
+        m.sponsor,
+        m.status,
+        CASE
+          WHEN c.id IS NULL THEN 'available'
+          ELSE c.status
+        END AS player_status
+       FROM sponsored_missions m
+       LEFT JOIN mission_claims c
+         ON c.mission_id = m.id
+        AND c.telegram_id = ?
+       WHERE m.status = 'active'
+       ORDER BY m.id DESC`,
+      [telegramId],
+      (err, rows) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        res.json({
+          success: true,
+          missions: rows
+        });
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   SPONSORED MISSION
+   PLAYER - SUBMIT
+========================= */
+
+app.post(
+  "/api/missions/:id/claim",
+  auth,
+  (req, res) => {
+
+    const telegramId =
+      String(req.telegramUser.id);
+
+    const missionId =
+      Number(req.params.id);
+
+    if (!Number.isInteger(missionId)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid mission ID"
+      });
+    }
+
+    db.get(
+      `SELECT
+        id,
+        title,
+        reward,
+        status
+       FROM sponsored_missions
+       WHERE id = ?`,
+      [missionId],
+      (err, mission) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        if (
+          !mission ||
+          mission.status !== "active"
+        ) {
+          return res.status(404).json({
+            success: false,
+            error: "Mission unavailable"
+          });
+        }
+
+        db.get(
+          `SELECT id
+           FROM mission_claims
+           WHERE mission_id = ?
+             AND telegram_id = ?`,
+          [
+            missionId,
+            telegramId
+          ],
+          (checkErr, existing) => {
+
+            if (checkErr) {
+              return res.status(500).json({
+                success: false,
+                error: checkErr.message
+              });
+            }
+
+            if (existing) {
+              return res.status(400).json({
+                success: false,
+                error:
+                  "You already submitted this mission"
+              });
+            }
+
+            db.run(
+              `INSERT INTO mission_claims
+              (mission_id, telegram_id, status)
+              VALUES (?, ?, 'pending')`,
+              [
+                missionId,
+                telegramId
+              ],
+              function(insertErr) {
+
+                if (insertErr) {
+                  return res.status(500).json({
+                    success: false,
+                    error: insertErr.message
+                  });
+                }
+
+                res.json({
+                  success: true,
+                  message:
+                    "Mission submitted for review"
+                });
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+);
 
 
 /* =========================
@@ -497,11 +665,11 @@ app.post("/api/withdraw", auth, (req, res) => {
 
   if (
     !Number.isInteger(amount) ||
-    amount <= 0
+    amount < 100
   ) {
     return res.status(400).json({
       success: false,
-      error: "Invalid amount"
+      error: "Minimum withdrawal is 100 coins"
     });
   }
 
@@ -549,8 +717,11 @@ app.post("/api/withdraw", auth, (req, res) => {
         `UPDATE users
          SET coins = coins - ?
          WHERE telegram_id = ?`,
-        [amount, telegramId],
-        function (updateErr) {
+        [
+          amount,
+          telegramId
+        ],
+        function(updateErr) {
 
           if (updateErr) {
             return res.status(500).json({
@@ -569,7 +740,7 @@ app.post("/api/withdraw", auth, (req, res) => {
               method,
               paymentNumber
             ],
-            function (insertErr) {
+            function(insertErr) {
 
               if (insertErr) {
                 return res.status(500).json({
@@ -594,9 +765,8 @@ app.post("/api/withdraw", auth, (req, res) => {
 
     }
   );
+
 });
-
-
 /* =========================
    LEADERBOARD
 ========================= */
@@ -629,11 +799,417 @@ app.get("/api/leaderboard", (req, res) => {
 
     }
   );
+
 });
 
 
+/* =========================================================
+   ADMIN - SPONSORED MISSIONS
+========================================================= */
+
+
 /* =========================
-   ADMIN - PENDING
+   GET ALL MISSIONS
+========================= */
+
+app.get(
+  "/api/admin/missions",
+  adminAuth,
+  (req, res) => {
+
+    db.all(
+      `SELECT *
+       FROM sponsored_missions
+       ORDER BY id DESC`,
+      [],
+      (err, rows) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        res.json({
+          success: true,
+          missions: rows
+        });
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   CREATE MISSION
+========================= */
+
+app.post(
+  "/api/admin/missions",
+  adminAuth,
+  (req, res) => {
+
+    const title =
+      String(req.body.title || "").trim();
+
+    const description =
+      String(req.body.description || "").trim();
+
+    const reward =
+      Number(req.body.reward);
+
+    const sponsor =
+      String(req.body.sponsor || "").trim();
+
+    if (
+      !title ||
+      !description ||
+      !Number.isInteger(reward) ||
+      reward <= 0
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        error:
+          "Title, description and valid reward required"
+      });
+
+    }
+
+    db.run(
+      `INSERT INTO sponsored_missions
+      (title, description, reward, sponsor, status)
+      VALUES (?, ?, ?, ?, 'active')`,
+      [
+        title,
+        description,
+        reward,
+        sponsor || null
+      ],
+      function(err) {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        res.json({
+          success: true,
+          mission_id: this.lastID
+        });
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   ACTIVATE / DEACTIVATE
+========================= */
+
+app.post(
+  "/api/admin/missions/:id/toggle",
+  adminAuth,
+  (req, res) => {
+
+    const id =
+      Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid mission ID"
+      });
+    }
+
+    db.get(
+      `SELECT status
+       FROM sponsored_missions
+       WHERE id = ?`,
+      [id],
+      (err, mission) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        if (!mission) {
+          return res.status(404).json({
+            success: false,
+            error: "Mission not found"
+          });
+        }
+
+        const newStatus =
+          mission.status === "active"
+            ? "inactive"
+            : "active";
+
+        db.run(
+          `UPDATE sponsored_missions
+           SET status = ?
+           WHERE id = ?`,
+          [
+            newStatus,
+            id
+          ],
+          function(updateErr) {
+
+            if (updateErr) {
+              return res.status(500).json({
+                success: false,
+                error: updateErr.message
+              });
+            }
+
+            res.json({
+              success: true,
+              status: newStatus
+            });
+
+          }
+        );
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================================================
+   ADMIN - MISSION CLAIMS
+========================================================= */
+
+
+/* =========================
+   GET CLAIMS
+========================= */
+
+app.get(
+  "/api/admin/mission-claims",
+  adminAuth,
+  (req, res) => {
+
+    db.all(
+      `SELECT
+        c.id,
+        c.mission_id,
+        c.telegram_id,
+        c.status,
+        c.created_at,
+        c.processed_at,
+        m.title,
+        m.reward,
+        m.sponsor
+       FROM mission_claims c
+       JOIN sponsored_missions m
+         ON m.id = c.mission_id
+       ORDER BY c.created_at DESC`,
+      [],
+      (err, rows) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        res.json({
+          success: true,
+          claims: rows
+        });
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   APPROVE MISSION CLAIM
+========================= */
+
+app.post(
+  "/api/admin/mission-claims/:id/approve",
+  adminAuth,
+  (req, res) => {
+
+    const id =
+      Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid claim ID"
+      });
+    }
+
+    db.get(
+      `SELECT
+        c.id,
+        c.telegram_id,
+        c.status,
+        m.reward
+       FROM mission_claims c
+       JOIN sponsored_missions m
+         ON m.id = c.mission_id
+       WHERE c.id = ?
+         AND c.status = 'pending'`,
+      [id],
+      (err, claim) => {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        if (!claim) {
+          return res.status(404).json({
+            success: false,
+            error:
+              "Claim not found or already processed"
+          });
+        }
+
+        db.run(
+          `UPDATE users
+           SET coins = coins + ?
+           WHERE telegram_id = ?`,
+          [
+            claim.reward,
+            claim.telegram_id
+          ],
+          function(updateErr) {
+
+            if (updateErr) {
+              return res.status(500).json({
+                success: false,
+                error: updateErr.message
+              });
+            }
+
+            db.run(
+              `UPDATE mission_claims
+               SET status = 'approved',
+                   processed_at = CURRENT_TIMESTAMP
+               WHERE id = ?`,
+              [id],
+              function(statusErr) {
+
+                if (statusErr) {
+                  return res.status(500).json({
+                    success: false,
+                    error: statusErr.message
+                  });
+                }
+
+                db.run(
+                  `INSERT INTO game_events
+                  (telegram_id, event_type, coins)
+                  VALUES (?, ?, ?)`,
+                  [
+                    claim.telegram_id,
+                    "sponsored_mission",
+                    claim.reward
+                  ]
+                );
+
+                res.json({
+                  success: true,
+                  reward: claim.reward,
+                  message:
+                    "Mission approved and coins added"
+                });
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+);
+
+
+/* =========================
+   REJECT MISSION CLAIM
+========================= */
+
+app.post(
+  "/api/admin/mission-claims/:id/reject",
+  adminAuth,
+  (req, res) => {
+
+    const id =
+      Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid claim ID"
+      });
+    }
+
+    db.run(
+      `UPDATE mission_claims
+       SET status = 'rejected',
+           processed_at = CURRENT_TIMESTAMP
+       WHERE id = ?
+         AND status = 'pending'`,
+      [id],
+      function(err) {
+
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            error: err.message
+          });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({
+            success: false,
+            error:
+              "Claim not found or already processed"
+          });
+        }
+
+        res.json({
+          success: true,
+          message:
+            "Mission claim rejected"
+        });
+
+      }
+    );
+
+  }
+);
+/* =========================================================
+   ADMIN - WITHDRAWALS
+========================================================= */
+
+
+/* =========================
+   PENDING WITHDRAWALS
 ========================= */
 
 app.get(
@@ -670,12 +1246,13 @@ app.get(
 
       }
     );
+
   }
 );
 
 
 /* =========================
-   ADMIN - APPROVE
+   APPROVE WITHDRAWAL
 ========================= */
 
 app.post(
@@ -700,7 +1277,7 @@ app.post(
        WHERE id = ?
          AND status = 'pending'`,
       [id],
-      function (err) {
+      function(err) {
 
         if (err) {
           return res.status(500).json({
@@ -719,17 +1296,19 @@ app.post(
 
         res.json({
           success: true,
-          message: "Withdrawal approved"
+          message:
+            "Withdrawal approved"
         });
 
       }
     );
+
   }
 );
 
 
 /* =========================
-   ADMIN - REJECT
+   REJECT WITHDRAWAL + REFUND
 ========================= */
 
 app.post(
@@ -780,7 +1359,7 @@ app.post(
             withdrawal.amount,
             withdrawal.telegram_id
           ],
-          function (refundErr) {
+          function(refundErr) {
 
             if (refundErr) {
               return res.status(500).json({
@@ -795,7 +1374,7 @@ app.post(
                    processed_at = CURRENT_TIMESTAMP
                WHERE id = ?`,
               [id],
-              function (updateErr) {
+              function(updateErr) {
 
                 if (updateErr) {
                   return res.status(500).json({
@@ -818,12 +1397,13 @@ app.post(
 
       }
     );
+
   }
 );
 
 
 /* =========================
-   ADMIN - HISTORY
+   WITHDRAWAL HISTORY
 ========================= */
 
 app.get(
@@ -860,13 +1440,14 @@ app.get(
 
       }
     );
+
   }
 );
 
 
-/* =========================
+/* =========================================================
    ADMIN - STATS
-========================= */
+========================================================= */
 
 app.get(
   "/api/admin/stats",
@@ -983,6 +1564,7 @@ app.get(
 
       }
     );
+
   }
 );
 
@@ -992,7 +1574,9 @@ app.get(
 ========================= */
 
 app.listen(PORT, () => {
+
   console.log(
     `Coin Rush backend running on port ${PORT}`
   );
+
 });
