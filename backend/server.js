@@ -479,6 +479,100 @@ app.get("/api/admin/withdrawals/all", adminAuth, (req, res) => {
     }
   );
 });
+app.get("/api/admin/stats", adminAuth, (req, res) => {
+  const stats = {};
+
+  db.get(
+    `SELECT COUNT(*) AS total_users FROM users`,
+    [],
+    (err, users) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          error: err.message
+        });
+      }
+
+      stats.total_users = users.total_users;
+
+      db.get(
+        `SELECT
+          COUNT(*) AS total_withdrawals,
+          COALESCE(SUM(amount), 0) AS total_withdrawal_coins
+         FROM withdrawals`,
+        [],
+        (err, withdrawals) => {
+          if (err) {
+            return res.status(500).json({
+              success: false,
+              error: err.message
+            });
+          }
+
+          stats.total_withdrawals = withdrawals.total_withdrawals;
+          stats.total_withdrawal_coins =
+            withdrawals.total_withdrawal_coins;
+
+          db.get(
+            `SELECT COUNT(*) AS pending
+             FROM withdrawals
+             WHERE status = 'pending'`,
+            [],
+            (err, pending) => {
+              if (err) {
+                return res.status(500).json({
+                  success: false,
+                  error: err.message
+                });
+              }
+
+              stats.pending = pending.pending;
+
+              db.get(
+                `SELECT COUNT(*) AS approved
+                 FROM withdrawals
+                 WHERE status = 'approved'`,
+                [],
+                (err, approved) => {
+                  if (err) {
+                    return res.status(500).json({
+                      success: false,
+                      error: err.message
+                    });
+                  }
+
+                  stats.approved = approved.approved;
+
+                  db.get(
+                    `SELECT COUNT(*) AS rejected
+                     FROM withdrawals
+                     WHERE status = 'rejected'`,
+                    [],
+                    (err, rejected) => {
+                      if (err) {
+                        return res.status(500).json({
+                          success: false,
+                          error: err.message
+                        });
+                      }
+
+                      stats.rejected = rejected.rejected;
+
+                      res.json({
+                        success: true,
+                        stats
+                      });
+                    }
+                  );
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
 app.listen(PORT, () => {
   console.log(`Coin Rush backend running on port ${PORT}`);
 });
