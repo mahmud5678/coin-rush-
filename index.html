@@ -334,3 +334,224 @@ async function login(){
 
      document.getElementById(
       
+<script>
+const API = "https://coin-rush-nxeb.onrender.com";
+const tg = window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
+const initData = tg.initData || "";
+let currentUser = null;
+
+async function api(path, options = {}) {
+  const response = await fetch(API + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "x-telegram-init-data": initData,
+      ...(options.headers || {})
+    }
+  });
+
+  return await response.json();
+}
+
+async function login() {
+  try {
+    if (!initData) {
+      document.getElementById("connection").textContent =
+        "Open this game from Telegram.";
+      return;
+    }
+
+    const data = await api("/api/auth", {
+      method: "POST"
+    });
+
+    if (!data.success) {
+      throw new Error(data.error || "Login failed");
+    }
+
+    currentUser = data.user;
+
+    document.getElementById("playerName").textContent =
+      currentUser.first_name || currentUser.username || "Player";
+
+    document.getElementById("connection").textContent =
+      "Connected ✓";
+
+    await loadProfile();
+    await loadLeaderboard();
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById("connection").textContent =
+      "Connection failed: " + error.message;
+  }
+}
+
+async function loadProfile() {
+  const data = await api("/api/profile");
+
+  if (!data.success) {
+    throw new Error(data.error || "Profile loading failed");
+  }
+
+  const user = data.user;
+
+  document.getElementById("coins").textContent = user.coins;
+  document.getElementById("walletCoins").textContent = user.coins;
+  document.getElementById("xp").textContent = user.xp;
+  document.getElementById("level").textContent = user.level;
+
+  updateProgress(user);
+}
+
+function updateProgress(user) {
+  const progress = Math.min((user.xp % 10) * 10, 100);
+  document.getElementById("xpBar").style.width = progress + "%";
+
+  document.getElementById("missionLevel").textContent =
+    "Level " + user.level + " / 5";
+}
+
+async function playGame() {
+  const message = document.getElementById("gameMessage");
+  message.textContent = "Playing...";
+
+  try {
+    const data = await api("/api/game/play", {
+      method: "POST"
+    });
+
+    if (!data.success) {
+      throw new Error(data.error || "Game failed");
+    }
+
+    message.textContent = "+" + data.reward + " coins 🎉";
+
+    await loadProfile();
+
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
+async function dailyReward() {
+  const message = document.getElementById("gameMessage");
+  message.textContent = "Claiming reward...";
+
+  try {
+    const data = await api("/api/reward/daily", {
+      method: "POST"
+    });
+
+    if (!data.success) {
+      throw new Error(data.error || "Reward failed");
+    }
+
+    message.textContent = "+" + data.reward + " coins 🎁";
+
+    await loadProfile();
+
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
+async function withdrawRequest() {
+  const amount = Number(
+    document.getElementById("withdrawAmount").value
+  );
+
+  const method = document.getElementById("withdrawMethod").value;
+  const paymentNumber =
+    document.getElementById("paymentNumber").value.trim();
+
+  const message =
+    document.getElementById("withdrawMessage");
+
+  if (amount < 100) {
+    message.textContent = "Minimum withdrawal is 100 coins.";
+    return;
+  }
+
+  if (!method) {
+    message.textContent = "Select a payment method.";
+    return;
+  }
+
+  if (!paymentNumber) {
+    message.textContent = "Enter payment number.";
+    return;
+  }
+
+  try {
+    const data = await api("/api/withdraw", {
+      method: "POST",
+      body: JSON.stringify({
+        amount,
+        method: method.toLowerCase(),
+        payment_number: paymentNumber
+      })
+    });
+
+    if (!data.success) {
+      throw new Error(data.error || "Withdrawal failed");
+    }
+
+    message.textContent =
+      "Withdrawal request submitted ✓";
+
+    await loadProfile();
+
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
+async function loadLeaderboard() {
+  try {
+    const data = await api("/api/leaderboard");
+
+    if (!data.success) return;
+
+    const box = document.getElementById("leaderboard");
+
+    if (!data.leaderboard.length) {
+      box.textContent = "No players yet.";
+      return;
+    }
+
+    box.innerHTML = data.leaderboard
+      .map((user, index) =>
+        `<div class="mission">
+          #${index + 1} —
+          ${user.first_name || user.username || "Player"}
+          <strong>${user.coins}</strong> coins
+        </div>`
+      )
+      .join("");
+
+  } catch (error) {
+    document.getElementById("leaderboard").textContent =
+      "Leaderboard unavailable.";
+  }
+}
+
+function copyReferral() {
+  const input = document.getElementById("refLink");
+
+  input.select();
+
+  try {
+    document.execCommand("copy");
+    alert("Referral link copied!");
+  } catch {
+    alert("Copy failed. Long press the link to copy.");
+  }
+}
+
+login();
+</script>
