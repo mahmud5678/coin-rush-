@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title>
-
-<style>
+<title>Coin Rush Admin</title><style>
 body{
   margin:0;
   padding:20px;
@@ -49,6 +46,11 @@ button{
   cursor:pointer;
 }
 
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
 .login{
   background:#3b82f6;
   color:white;
@@ -69,6 +71,7 @@ button{
   padding:15px;
   border-radius:10px;
   margin-top:10px;
+  overflow-wrap:anywhere;
 }
 
 .stats{
@@ -96,6 +99,21 @@ button{
   font-weight:bold;
 }
 
+.method{
+  display:inline-block;
+  background:#111827;
+  padding:6px 10px;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.wallet{
+  background:#111827;
+  padding:10px;
+  border-radius:8px;
+  overflow-wrap:anywhere;
+}
+
 #loginMessage{
   text-align:center;
   min-height:20px;
@@ -110,109 +128,105 @@ button{
     grid-column:auto;
   }
 }
-</style>
-</head>
+</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
+type="password"
+id="adminKey"
+placeholder="Admin key"
+autocomplete="off"
 
-<body>
-
-<div class="container">
-
-<h1>🛠️ Coin Rush Admin</h1>
-
-<div class="card" id="loginBox">
-
-<h3>Admin Login</h3>
-
-<input
-  type="password"
-  id="adminKey"
-  placeholder="Admin key"
->
+«»
 
 <button
-  type="button"
-  class="login"
-  id="loginButton">
-  🔐 LOGIN
+type="button"
+class="login"
+id="loginButton">
+🔐 LOGIN
 </button>
 
-<p id="loginMessage"></p>
-
-</div>
-
-
-<div class="card" id="panel" style="display:none">
-
-<h2>📊 Dashboard</h2>
-
-<div class="stats">
-
-<div class="stat">
+<p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>📊 Dashboard</h2><div class="stats"><div class="stat">
 <strong>👥 Total Users</strong>
 <h2 id="totalUsers">-</h2>
-</div>
-
-<div class="stat">
+</div><div class="stat">
 <strong>⏳ Pending</strong>
 <h2 id="pendingCount">-</h2>
-</div>
-
-<div class="stat">
+</div><div class="stat">
 <strong>✅ Approved</strong>
 <h2 id="approvedCount">-</h2>
-</div>
-
-<div class="stat">
+</div><div class="stat">
 <strong>❌ Rejected</strong>
 <h2 id="rejectedCount">-</h2>
-</div>
-
-<div class="stat full">
+</div><div class="stat full">
 <strong>💰 Total Withdrawal Coins</strong>
 <h2 id="totalCoins">-</h2>
-</div>
-
-</div>
-
-<h2>💰 Withdrawal Management</h2>
-
-<button
-  type="button"
-  id="refreshButton">
-  🔄 REFRESH
+</div></div><h2>💰 Withdrawal Management</h2><button
+type="button"
+id="refreshButton">
+🔄 REFRESH
 </button>
 
-<h3>⏳ Pending Withdrawals</h3>
-
-<div id="pendingRequests">
+<h3>⏳ Pending Withdrawals</h3><div id="pendingRequests">
 Loading...
-</div>
-
-<h3>📜 Withdrawal History</h3>
-
-<div id="history">
+</div><h3>📜 Withdrawal History</h3><div id="history">
 Loading...
-</div>
+</div></div></div><script>
 
-</div>
-
-</div>
-
-
-<script>
-
-const API = "https://coin-rush-nxeb.onrender.com";
+const API =
+  "https://coin-rush-nxeb.onrender.com";
 
 let adminKey = "";
 
 
-document.getElementById("loginButton")
-.addEventListener("click", login);
+/* =========================
+   EVENTS
+========================= */
+
+document
+  .getElementById("loginButton")
+  .addEventListener("click", login);
+
+document
+  .getElementById("refreshButton")
+  .addEventListener("click", refreshAll);
 
 
-document.getElementById("refreshButton")
-.addEventListener("click", refreshAll);
+/* =========================
+   HTML ESCAPE
+========================= */
 
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================
+   METHOD NAME
+========================= */
+
+function getMethodName(method){
+
+  if(method === "bkash"){
+    return "bKash";
+  }
+
+  if(method === "telegram_wallet"){
+    return "Telegram Wallet";
+  }
+
+  return "Unknown";
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
 
 async function login(){
 
@@ -222,7 +236,8 @@ async function login(){
   const message =
     document.getElementById("loginMessage");
 
-  adminKey = input.value.trim();
+  adminKey =
+    input.value.trim();
 
   if(!adminKey){
 
@@ -237,17 +252,19 @@ async function login(){
 
   try{
 
-    const response = await fetch(
-      API + "/api/admin/withdrawals/all",
-      {
-        method:"GET",
-        headers:{
-          "x-admin-key":adminKey
+    const response =
+      await fetch(
+        API + "/api/admin/withdrawals/all",
+        {
+          method:"GET",
+          headers:{
+            "x-admin-key":adminKey
+          }
         }
-      }
-    );
+      );
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     if(!response.ok){
 
@@ -257,10 +274,12 @@ async function login(){
       return;
     }
 
-    document.getElementById("loginBox")
+    document
+      .getElementById("loginBox")
       .style.display = "none";
 
-    document.getElementById("panel")
+    document
+      .getElementById("panel")
       .style.display = "block";
 
     await refreshAll();
@@ -277,6 +296,10 @@ async function login(){
 }
 
 
+/* =========================
+   REFRESH ALL
+========================= */
+
 async function refreshAll(){
 
   await loadStats();
@@ -285,18 +308,23 @@ async function refreshAll(){
 }
 
 
+/* =========================
+   STATS
+========================= */
+
 async function loadStats(){
 
   try{
 
-    const response = await fetch(
-      API + "/api/admin/stats",
-      {
-        headers:{
-          "x-admin-key":adminKey
+    const response =
+      await fetch(
+        API + "/api/admin/stats",
+        {
+          headers:{
+            "x-admin-key":adminKey
+          }
         }
-      }
-    );
+      );
 
     const data =
       await response.json();
@@ -305,39 +333,61 @@ async function loadStats(){
       return;
     }
 
-    const s = data.stats;
+    const s =
+      data.stats;
 
-    document.getElementById("totalUsers")
-      .innerText = s.total_users;
+    document
+      .getElementById("totalUsers")
+      .innerText =
+      s.total_users;
 
-    document.getElementById("pendingCount")
-      .innerText = s.pending;
+    document
+      .getElementById("pendingCount")
+      .innerText =
+      s.pending;
 
-    document.getElementById("approvedCount")
-      .innerText = s.approved;
+    document
+      .getElementById("approvedCount")
+      .innerText =
+      s.approved;
 
-    document.getElementById("rejectedCount")
-      .innerText = s.rejected;
+    document
+      .getElementById("rejectedCount")
+      .innerText =
+      s.rejected;
 
-    document.getElementById("totalCoins")
-      .innerText = s.total_withdrawal_coins;
+    document
+      .getElementById("totalCoins")
+      .innerText =
+      s.total_withdrawal_coins;
 
   }catch(error){
 
-    console.error("Stats error:",error);
+    console.error(
+      "Stats error:",
+      error
+    );
 
   }
 
 }
 
 
+/* =========================
+   WITHDRAWALS
+========================= */
+
 async function loadRequests(){
 
   const pendingBox =
-    document.getElementById("pendingRequests");
+    document.getElementById(
+      "pendingRequests"
+    );
 
   const historyBox =
-    document.getElementById("history");
+    document.getElementById(
+      "history"
+    );
 
   pendingBox.innerHTML =
     "⏳ Loading...";
@@ -347,14 +397,15 @@ async function loadRequests(){
 
   try{
 
-    const response = await fetch(
-      API + "/api/admin/withdrawals/all",
-      {
-        headers:{
-          "x-admin-key":adminKey
+    const response =
+      await fetch(
+        API + "/api/admin/withdrawals/all",
+        {
+          headers:{
+            "x-admin-key":adminKey
+          }
         }
-      }
-    );
+      );
 
     const data =
       await response.json();
@@ -364,7 +415,8 @@ async function loadRequests(){
       pendingBox.innerHTML =
         "❌ Authentication failed.";
 
-      historyBox.innerHTML = "";
+      historyBox.innerHTML =
+        "";
 
       return;
     }
@@ -374,68 +426,125 @@ async function loadRequests(){
 
     const pending =
       withdrawals.filter(
-        item => item.status === "pending"
+        item =>
+          item.status === "pending"
       );
 
     const history =
       withdrawals.filter(
-        item => item.status !== "pending"
+        item =>
+          item.status !== "pending"
       );
 
+
+    /* =====================
+       PENDING
+    ===================== */
 
     if(pending.length === 0){
 
       pendingBox.innerHTML = `
         <div class="request">
-          <strong>✅ No pending withdrawals.</strong>
+          <strong>
+            ✅ No pending withdrawals.
+          </strong>
         </div>
       `;
 
     }else{
 
       pendingBox.innerHTML =
-        pending.map(item => `
+        pending
+          .map(item => {
 
-        <div class="request">
+            const method =
+              getMethodName(
+                item.method
+              );
 
-          <p><strong>ID:</strong> ${item.id}</p>
+            const payment =
+              escapeHtml(
+                item.payment_number
+              );
 
-          <p><strong>Telegram ID:</strong>
-          ${item.telegram_id}</p>
+            const paymentLabel =
+              item.method ===
+              "telegram_wallet"
+                ? "Wallet Address"
+                : "bKash Number";
 
-          <p><strong>Amount:</strong>
-          ${item.amount} coins</p>
+            return `
 
-          <p><strong>Method:</strong>
-          ${item.method}</p>
+              <div class="request">
 
-          <p><strong>Payment Number:</strong>
-          ${item.payment_number}</p>
+                <p>
+                  <strong>ID:</strong>
+                  ${escapeHtml(item.id)}
+                </p>
 
-          <p><strong>Date:</strong>
-          ${item.created_at}</p>
+                <p>
+                  <strong>Telegram ID:</strong>
+                  ${escapeHtml(
+                    item.telegram_id
+                  )}
+                </p>
 
-          <p class="status">
-          ⏳ PENDING
-          </p>
+                <p>
+                  <strong>Amount:</strong>
+                  ${escapeHtml(
+                    item.amount
+                  )}
+                  coins
+                </p>
 
-          <button
-            type="button"
-            class="approve"
-            data-id="${item.id}">
-            ✅ APPROVE
-          </button>
+                <p>
+                  <strong>Method:</strong>
+                  <span class="method">
+                    ${escapeHtml(method)}
+                  </span>
+                </p>
 
-          <button
-            type="button"
-            class="reject"
-            data-id="${item.id}">
-            ❌ REJECT
-          </button>
+                <p>
+                  <strong>
+                    ${paymentLabel}:
+                  </strong>
+                </p>
 
-        </div>
+                <div class="wallet">
+                  ${payment}
+                </div>
 
-      `).join("");
+                <p>
+                  <strong>Date:</strong>
+                  ${escapeHtml(
+                    item.created_at
+                  )}
+                </p>
+
+                <p class="status">
+                  ⏳ PENDING
+                </p>
+
+                <button
+                  type="button"
+                  class="approve"
+                  data-id="${escapeHtml(item.id)}">
+                  ✅ APPROVE
+                </button>
+
+                <button
+                  type="button"
+                  class="reject"
+                  data-id="${escapeHtml(item.id)}">
+                  ❌ REJECT
+                </button>
+
+              </div>
+
+            `;
+
+          })
+          .join("");
 
 
       pendingBox
@@ -444,7 +553,10 @@ async function loadRequests(){
 
           button.addEventListener(
             "click",
-            () => approve(button.dataset.id)
+            () =>
+              approve(
+                button.dataset.id
+              )
           );
 
         });
@@ -456,13 +568,20 @@ async function loadRequests(){
 
           button.addEventListener(
             "click",
-            () => reject(button.dataset.id)
+            () =>
+              reject(
+                button.dataset.id
+              )
           );
 
         });
 
     }
 
+
+    /* =====================
+       HISTORY
+    ===================== */
 
     if(history.length === 0){
 
@@ -475,41 +594,97 @@ async function loadRequests(){
     }else{
 
       historyBox.innerHTML =
-        history.map(item => `
+        history
+          .map(item => {
 
-        <div class="request">
+            const method =
+              getMethodName(
+                item.method
+              );
 
-          <p><strong>ID:</strong> ${item.id}</p>
+            const payment =
+              escapeHtml(
+                item.payment_number
+              );
 
-          <p><strong>Telegram ID:</strong>
-          ${item.telegram_id}</p>
+            const paymentLabel =
+              item.method ===
+              "telegram_wallet"
+                ? "Wallet Address"
+                : "bKash Number";
 
-          <p><strong>Amount:</strong>
-          ${item.amount} coins</p>
+            const status =
+              item.status ===
+              "approved"
+                ? "✅ APPROVED"
+                : "❌ REJECTED";
 
-          <p><strong>Method:</strong>
-          ${item.method}</p>
+            return `
 
-          <p><strong>Payment Number:</strong>
-          ${item.payment_number}</p>
+              <div class="request">
 
-          <p class="status">
-          ${
-            item.status === "approved"
-            ? "✅ APPROVED"
-            : "❌ REJECTED"
-          }
-          </p>
+                <p>
+                  <strong>ID:</strong>
+                  ${escapeHtml(item.id)}
+                </p>
 
-          <p><strong>Requested:</strong>
-          ${item.created_at}</p>
+                <p>
+                  <strong>Telegram ID:</strong>
+                  ${escapeHtml(
+                    item.telegram_id
+                  )}
+                </p>
 
-          <p><strong>Processed:</strong>
-          ${item.processed_at || "N/A"}</p>
+                <p>
+                  <strong>Amount:</strong>
+                  ${escapeHtml(
+                    item.amount
+                  )}
+                  coins
+                </p>
 
-        </div>
+                <p>
+                  <strong>Method:</strong>
+                  <span class="method">
+                    ${escapeHtml(method)}
+                  </span>
+                </p>
 
-      `).join("");
+                <p>
+                  <strong>
+                    ${paymentLabel}:
+                  </strong>
+                </p>
+
+                <div class="wallet">
+                  ${payment}
+                </div>
+
+                <p class="status">
+                  ${status}
+                </p>
+
+                <p>
+                  <strong>Requested:</strong>
+                  ${escapeHtml(
+                    item.created_at
+                  )}
+                </p>
+
+                <p>
+                  <strong>Processed:</strong>
+                  ${escapeHtml(
+                    item.processed_at ||
+                    "N/A"
+                  )}
+                </p>
+
+              </div>
+
+            `;
+
+          })
+          .join("");
 
     }
 
@@ -523,30 +698,41 @@ async function loadRequests(){
       </div>
     `;
 
-    historyBox.innerHTML = "";
+    historyBox.innerHTML =
+      "";
 
   }
 
 }
 
 
+/* =========================
+   APPROVE
+========================= */
+
 async function approve(id){
 
   if(!confirm(
     "Approve this withdrawal?"
-  )) return;
+  )){
+    return;
+  }
 
   try{
 
-    const response = await fetch(
-      API + "/api/admin/withdrawals/" + id + "/approve",
-      {
-        method:"POST",
-        headers:{
-          "x-admin-key":adminKey
+    const response =
+      await fetch(
+        API +
+        "/api/admin/withdrawals/" +
+        encodeURIComponent(id) +
+        "/approve",
+        {
+          method:"POST",
+          headers:{
+            "x-admin-key":adminKey
+          }
         }
-      }
-    );
+      );
 
     const data =
       await response.json();
@@ -555,7 +741,10 @@ async function approve(id){
 
       alert(
         "❌ " +
-        (data.error || "Approve failed")
+        (
+          data.error ||
+          "Approve failed"
+        )
       );
 
       return;
@@ -580,23 +769,33 @@ async function approve(id){
 }
 
 
+/* =========================
+   REJECT
+========================= */
+
 async function reject(id){
 
   if(!confirm(
     "Reject this withdrawal? Coins will be refunded."
-  )) return;
+  )){
+    return;
+  }
 
   try{
 
-    const response = await fetch(
-      API + "/api/admin/withdrawals/" + id + "/reject",
-      {
-        method:"POST",
-        headers:{
-          "x-admin-key":adminKey
+    const response =
+      await fetch(
+        API +
+        "/api/admin/withdrawals/" +
+        encodeURIComponent(id) +
+        "/reject",
+        {
+          method:"POST",
+          headers:{
+            "x-admin-key":adminKey
+          }
         }
-      }
-    );
+      );
 
     const data =
       await response.json();
@@ -605,7 +804,10 @@ async function reject(id){
 
       alert(
         "❌ " +
-        (data.error || "Reject failed")
+        (
+          data.error ||
+          "Reject failed"
+        )
       );
 
       return;
