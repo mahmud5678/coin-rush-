@@ -1,8 +1,13 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title><style>
+
+<title>Coin Rush Admin</title>
+
+<style>
+
 body{
   margin:0;
   padding:20px;
@@ -120,6 +125,7 @@ button:disabled{
 }
 
 @media(max-width:500px){
+
   .stats{
     grid-template-columns:1fr;
   }
@@ -127,48 +133,103 @@ button:disabled{
   .full{
     grid-column:auto;
   }
-}
-</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
-type="password"
-id="adminKey"
-placeholder="Admin key"
-autocomplete="off"
 
-«»
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🛠️ Coin Rush Admin</h1>
+
+<div class="card" id="loginBox">
+
+<h3>Admin Login</h3>
+
+<input
+  type="password"
+  id="adminKey"
+  placeholder="Admin key"
+  autocomplete="off"
+>
 
 <button
-type="button"
-class="login"
-id="loginButton">
-🔐 LOGIN
+  type="button"
+  class="login"
+  id="loginButton">
+  🔐 LOGIN
 </button>
 
-<p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>📊 Dashboard</h2><div class="stats"><div class="stat">
+<p id="loginMessage"></p>
+
+</div>
+
+
+<div class="card" id="panel" style="display:none">
+
+<h2>📊 Dashboard</h2>
+
+<div class="stats">
+
+<div class="stat">
 <strong>👥 Total Users</strong>
 <h2 id="totalUsers">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>⏳ Pending</strong>
 <h2 id="pendingCount">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>✅ Approved</strong>
 <h2 id="approvedCount">-</h2>
-</div><div class="stat">
+</div>
+
+<div class="stat">
 <strong>❌ Rejected</strong>
 <h2 id="rejectedCount">-</h2>
-</div><div class="stat full">
+</div>
+
+<div class="stat full">
 <strong>💰 Total Withdrawal Coins</strong>
 <h2 id="totalCoins">-</h2>
-</div></div><h2>💰 Withdrawal Management</h2><button
-type="button"
-id="refreshButton">
-🔄 REFRESH
+</div>
+
+</div>
+
+
+<h2>💰 Withdrawal Management</h2>
+
+<button
+  type="button"
+  id="refreshButton">
+  🔄 REFRESH
 </button>
 
-<h3>⏳ Pending Withdrawals</h3><div id="pendingRequests">
+
+<h3>⏳ Pending Withdrawals</h3>
+
+<div id="pendingRequests">
 Loading...
-</div><h3>📜 Withdrawal History</h3><div id="history">
+</div>
+
+
+<h3>📜 Withdrawal History</h3>
+
+<div id="history">
 Loading...
-</div></div></div><script>
+</div>
+
+</div>
+
+</div>
+
+
+<script>
 
 const API =
   "https://coin-rush-nxeb.onrender.com";
@@ -303,6 +364,7 @@ async function login(){
 async function refreshAll(){
 
   await loadStats();
+
   await loadRequests();
 
 }
@@ -577,9 +639,7 @@ async function loadRequests(){
         });
 
     }
-
-
-    /* =====================
+        /* =====================
        HISTORY
     ===================== */
 
@@ -831,5 +891,7 @@ async function reject(id){
 
 }
 
-</script></body>
-  </html>
+</script>
+
+</body>
+</html>
