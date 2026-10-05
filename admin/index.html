@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin Rush Admin</title>
+
+<style>
+body{
+  margin:0;
+  padding:20px;
+  font-family:Arial,sans-serif;
+  background:#111827;
+  color:white;
+}
+
+.container{
+  max-width:700px;
+  margin:auto;
+}
+
+.card{
+  background:#1f2937;
+  padding:20px;
+  border-radius:15px;
+  margin-bottom:15px;
+}
+
+h1{
+  text-align:center;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:0;
+  border-radius:8px;
+  box-sizing:border-box;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:8px;
+  margin-top:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.login{
+  background:#3b82f6;
+  color:white;
+}
+
+.approve{
+  background:#22c55e;
+  color:white;
+}
+
+.reject{
+  background:#ef4444;
+  color:white;
+}
+
+.request{
+  background:#374151;
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🛠️ Coin Rush Admin</h1>
+
+  <div class="card" id="loginBox">
+
+    <h3>Admin Login</h3>
+
+    <input
+      type="password"
+      id="adminKey"
+      placeholder="Admin key"
+    >
+
+    <button class="login" onclick="login()">
+      🔐 LOGIN
+    </button>
+
+    <p id="loginMessage"></p>
+
+  </div>
+
+
+  <div class="card" id="panel" style="display:none">
+
+    <h2>💰 Withdrawal Requests</h2>
+
+    <button onclick="loadRequests()">
+      🔄 REFRESH REQUESTS
+    </button>
+
+    <div id="requests">
+      No requests loaded.
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let loggedIn = false;
+
+
+/*
+  Demo admin login.
+
+  IMPORTANT:
+  Real authentication must be handled
+  by the backend, not this page.
+*/
+
+function login(){
+
+  const key =
+    document.getElementById(
+      "adminKey"
+    ).value;
+
+  if(key === "CHANGE_THIS_ADMIN_KEY"){
+
+    loggedIn = true;
+
+    document.getElementById(
+      "loginBox"
+    ).style.display = "none";
+
+    document.getElementById(
+      "panel"
+    ).style.display = "block";
+
+    loadRequests();
+
+  }else{
+
+    document.getElementById(
+      "loginMessage"
+    ).innerText =
+      "❌ Wrong admin key.";
+
+  }
+
+}
+
+
+/*
+  Placeholder until backend API
+  is connected.
+*/
+
+function loadRequests(){
+
+  const box =
+    document.getElementById(
+      "requests"
+    );
+
+  box.innerHTML = `
+    <div class="request">
+      <strong>No withdrawal requests.</strong>
+      <p>Backend API will appear here after connection.</p>
+    </div>
+  `;
+
+}
+
+
+function approve(id){
+
+  alert(
+    "Approve API will be connected in the backend step."
+  );
+
+}
+
+
+function reject(id){
+
+  alert(
+    "Reject API will be connected in the backend step."
+  );
+
+}
+
+</script>
+
+</body>
+</html>
