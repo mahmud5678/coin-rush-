@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title><style>
+<title>Coin Rush Admin</title>
+
+<style>
 body{
   margin:0;
   padding:20px;
@@ -67,24 +70,55 @@ button{
   border-radius:10px;
   margin-top:10px;
 }
-</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
-type="password"
-id="adminKey"
-placeholder="Admin key"
+</style>
+</head>
 
-«»
+<body>
+
+<div class="container">
+
+<h1>🛠️ Coin Rush Admin</h1>
+
+<div class="card" id="loginBox">
+
+<h3>Admin Login</h3>
+
+<input
+  type="password"
+  id="adminKey"
+  placeholder="Admin key"
+>
 
 <button class="login" onclick="login()">
 🔐 LOGIN
-</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>💰 Withdrawal Requests</h2><button onclick="loadRequests()">
+</button>
+
+<p id="loginMessage"></p>
+
+</div>
+
+<div class="card" id="panel" style="display:none">
+
+<h2>💰 Withdrawal Requests</h2>
+
+<button onclick="loadRequests()">
 🔄 REFRESH REQUESTS
-</button><div id="requests">
+</button>
+
+<div id="requests">
 Loading...
-</div></div></div><script>
+</div>
+
+</div>
+
+</div>
+
+<script>
 
 const API = "https://coin-rush-nxeb.onrender.com";
 
 let adminKey = "";
+
 
 function login(){
 
@@ -102,6 +136,7 @@ function login(){
   loadRequests();
 
 }
+
 
 async function loadRequests(){
 
@@ -137,6 +172,7 @@ async function loadRequests(){
     document.getElementById("panel").style.display =
       "block";
 
+
     if(!data.withdrawals || data.withdrawals.length === 0){
 
       box.innerHTML = `
@@ -147,6 +183,7 @@ async function loadRequests(){
 
       return;
     }
+
 
     box.innerHTML = data.withdrawals.map(item => `
 
@@ -166,12 +203,14 @@ async function loadRequests(){
 
         <p><strong>Date:</strong> ${item.created_at}</p>
 
-        <button class="approve"
+        <button
+          class="approve"
           onclick="approve(${item.id})">
           ✅ APPROVE
         </button>
 
-        <button class="reject"
+        <button
+          class="reject"
           onclick="reject(${item.id})">
           ❌ REJECT
         </button>
@@ -192,21 +231,91 @@ async function loadRequests(){
 
 }
 
-function approve(id){
 
-  alert(
-    "Approve API এখনো backend-এ যোগ করা হয়নি।"
-  );
+async function approve(id){
+
+  if(!confirm("Approve this withdrawal?")) return;
+
+  try{
+
+    const response = await fetch(
+      API + "/api/admin/withdrawals/" + id + "/approve",
+      {
+        method:"POST",
+        headers:{
+          "x-admin-key": adminKey
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+
+      alert(
+        "❌ " + (data.error || "Approve failed")
+      );
+
+      return;
+    }
+
+    alert("✅ Withdrawal approved.");
+
+    loadRequests();
+
+  }catch(error){
+
+    alert("❌ Connection error.");
+
+  }
 
 }
 
-function reject(id){
 
-  alert(
-    "Reject API এখনো backend-এ যোগ করা হয়নি।"
-  );
+async function reject(id){
+
+  if(!confirm(
+    "Reject this withdrawal? Coins will be refunded."
+  )) return;
+
+  try{
+
+    const response = await fetch(
+      API + "/api/admin/withdrawals/" + id + "/reject",
+      {
+        method:"POST",
+        headers:{
+          "x-admin-key": adminKey
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+
+      alert(
+        "❌ " + (data.error || "Reject failed")
+      );
+
+      return;
+    }
+
+    alert(
+      "✅ Withdrawal rejected and coins refunded."
+    );
+
+    loadRequests();
+
+  }catch(error){
+
+    alert("❌ Connection error.");
+
+  }
 
 }
 
-</script></body>
+</script>
+
+</body>
 </html>
