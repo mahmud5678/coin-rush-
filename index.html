@@ -8,136 +8,306 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+*{
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  color: white;
-  background: linear-gradient(135deg, #111827, #1e3a8a);
+body{
+  margin:0;
+  min-height:100vh;
+  color:#fff;
+  background:
+    radial-gradient(circle at top,#243b75 0,#111827 45%,#080d18 100%);
 }
 
-.container {
-  max-width: 520px;
-  margin: auto;
-  padding: 18px;
+.container{
+  max-width:520px;
+  margin:auto;
+  padding:16px;
 }
 
-.card {
-  background: rgba(255,255,255,.1);
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 15px;
+/* HEADER */
+
+.hero{
+  text-align:center;
+  padding:20px 10px 16px;
 }
 
-h1 {
-  text-align: center;
+.logo{
+  font-size:42px;
+  margin-bottom:5px;
 }
 
-h3 {
-  margin-top: 0;
+.hero h1{
+  margin:0;
+  font-size:30px;
+  letter-spacing:.5px;
 }
 
-.subtitle {
-  text-align: center;
-  opacity: .7;
+.hero p{
+  margin:7px 0 0;
+  color:#aeb9d4;
+  font-size:14px;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+/* CARDS */
+
+.card{
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:17px;
+  margin-bottom:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  backdrop-filter:blur(10px);
 }
 
-.stat {
-  background: rgba(0,0,0,.2);
-  padding: 14px;
-  border-radius: 12px;
-  text-align: center;
+.card h3{
+  margin:0 0 12px;
+  font-size:18px;
 }
 
-.stat strong {
-  display: block;
-  font-size: 24px;
-  margin-top: 5px;
+/* PLAYER */
+
+.player{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-button,
+.avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#facc15,#f97316);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+}
+
+.player-name{
+  font-size:17px;
+  font-weight:bold;
+}
+
+.connection{
+  color:#6ee7b7;
+  font-size:12px;
+  margin-top:3px;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stat{
+  background:rgba(0,0,0,.22);
+  border-radius:15px;
+  padding:14px;
+  text-align:center;
+}
+
+.stat-icon{
+  font-size:20px;
+}
+
+.stat-label{
+  color:#9ca9c5;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.stat strong{
+  display:block;
+  font-size:24px;
+  margin-top:4px;
+}
+
+/* XP */
+
+.xp-header{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+  font-size:13px;
+  color:#cbd5e1;
+}
+
+.progress{
+  height:11px;
+  background:rgba(255,255,255,.12);
+  border-radius:20px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+#xpBar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#facc15,#fb923c);
+  border-radius:20px;
+  transition:width .4s ease;
+}
+
+/* BUTTONS */
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:0;
+  border-radius:13px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.15s;
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+.play{
+  background:linear-gradient(135deg,#facc15,#f59e0b);
+  color:#111827;
+  font-size:17px;
+  box-shadow:0 7px 20px rgba(250,204,21,.2);
+}
+
+.reward{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+}
+
+.withdraw{
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  color:white;
+}
+
+.referral{
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9);
+  color:white;
+}
+
+/* MISSION */
+
+.mission{
+  background:rgba(0,0,0,.2);
+  padding:13px;
+  margin-top:9px;
+  border-radius:13px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  color:#e5e7eb;
+}
+
+.mission span{
+  font-size:14px;
+}
+
+.mission strong{
+  color:#facc15;
+  white-space:nowrap;
+}
+
+/* INPUT */
+
 input,
-select {
-  width: 100%;
-  padding: 13px;
-  margin-top: 9px;
-  border: 0;
-  border-radius: 10px;
+select{
+  width:100%;
+  padding:13px;
+  margin-top:9px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  background:rgba(0,0,0,.25);
+  color:white;
+  outline:none;
+  font-size:14px;
 }
 
-button {
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+input::placeholder{
+  color:#8995ad;
 }
 
-.play {
-  background: #facc15;
-  color: #111827;
+select option{
+  color:#111827;
 }
 
-.reward {
-  background: #22c55e;
-  color: white;
+/* WALLET */
+
+.wallet{
+  text-align:center;
+  padding:12px;
+  background:rgba(250,204,21,.08);
+  border:1px solid rgba(250,204,21,.15);
+  border-radius:15px;
+  margin-bottom:10px;
 }
 
-.withdraw {
-  background: #3b82f6;
-  color: white;
+.wallet-title{
+  color:#aeb9d4;
+  font-size:13px;
 }
 
-.referral {
-  background: #8b5cf6;
-  color: white;
+.wallet-coins{
+  font-size:32px;
+  font-weight:bold;
+  color:#facc15;
+  margin-top:3px;
 }
 
-.mission {
-  background: rgba(0,0,0,.2);
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 10px;
+.small{
+  font-size:12px;
+  color:#8995ad;
 }
 
-.progress {
-  height: 10px;
-  background: rgba(255,255,255,.2);
-  border-radius: 10px;
-  margin-top: 10px;
-  overflow: hidden;
+/* MESSAGE */
+
+.message{
+  text-align:center;
+  margin-top:10px;
+  min-height:20px;
+  font-size:13px;
+  color:#a7f3d0;
 }
 
-#xpBar {
-  height: 100%;
-  width: 0%;
-  background: #facc15;
-  transition: width .3s;
+/* LEADERBOARD */
+
+.rank{
+  color:#facc15;
+  font-weight:bold;
 }
 
-.small {
-  font-size: 13px;
-  opacity: .7;
+/* DIVIDER */
+
+.divider{
+  height:1px;
+  background:rgba(255,255,255,.08);
+  margin:14px 0;
 }
 
-.message {
-  text-align: center;
-  margin-top: 10px;
-  min-height: 20px;
-}
+/* MOBILE */
 
-#leaderboard .mission {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+@media(max-width:380px){
+  .container{
+    padding:12px;
+  }
+
+  .hero h1{
+    font-size:26px;
+  }
+
+  .stat strong{
+    font-size:21px;
+  }
 }
 </style>
 </head>
@@ -146,98 +316,116 @@ button {
 
 <div class="container">
 
+  <!-- HEADER -->
+  <div class="hero">
+    <div class="logo">🪙</div>
+    <h1>Coin Rush</h1>
+    <p>Play • Earn • Complete Missions</p>
+  </div>
+
+  <!-- PLAYER -->
   <div class="card">
-    <h1>🪙 Coin Rush</h1>
-    <div class="subtitle">
-      Play • Earn • Complete Missions
+    <div class="player">
+      <div class="avatar">👤</div>
+
+      <div>
+        <div class="player-name" id="playerName">
+          Connecting...
+        </div>
+
+        <div class="connection" id="connection">
+          Connecting to server...
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3>👤 Player</h3>
-
-    <div id="playerName">Connecting...</div>
-
-    <div class="small" id="connection">
-      Connecting to server...
-    </div>
-  </div>
-
+  <!-- STATS -->
   <div class="card">
 
     <div class="stats">
 
       <div class="stat">
-        🪙 Coins
+        <div class="stat-icon">🪙</div>
+        <div class="stat-label">COINS</div>
         <strong id="coins">0</strong>
       </div>
 
       <div class="stat">
-        ⭐ Level
+        <div class="stat-icon">⭐</div>
+        <div class="stat-label">LEVEL</div>
         <strong id="level">1</strong>
       </div>
 
       <div class="stat">
-        ⚡ XP
+        <div class="stat-icon">⚡</div>
+        <div class="stat-label">XP</div>
         <strong id="xp">0</strong>
       </div>
 
       <div class="stat">
-        🎮 Plays
+        <div class="stat-icon">🎮</div>
+        <div class="stat-label">PLAYS</div>
         <strong id="plays">0</strong>
       </div>
 
     </div>
 
-    <p id="xpText">Level progress</p>
+    <div class="xp-header">
+      <span>⭐ Level Progress</span>
+      <span id="xpText">0%</span>
+    </div>
 
     <div class="progress">
       <div id="xpBar"></div>
     </div>
 
     <button class="play" onclick="playGame()">
-      🎮 PLAY & EARN
+      🎮 PLAY & EARN  +10 🪙
     </button>
 
     <div class="message" id="gameMessage"></div>
 
   </div>
 
+  <!-- DAILY -->
   <div class="card">
 
     <h3>🎁 Daily Reward</h3>
 
     <p class="small">
-      Claim your daily reward once per day.
+      Come back every day and claim your reward.
     </p>
 
     <button class="reward" onclick="dailyReward()">
-      🎁 CLAIM DAILY REWARD
+      🎁 CLAIM 100 COINS
     </button>
 
   </div>
 
+  <!-- MISSIONS -->
   <div class="card">
 
     <h3>🎯 Missions</h3>
 
     <div class="mission">
-      🎮 Play 5 times
-      <div id="mission5">0 / 5</div>
+      <span>🎮 Play 5 times</span>
+      <strong id="mission5">0 / 5</strong>
     </div>
 
     <div class="mission">
-      🎮 Play 10 times
-      <div id="mission10">0 / 10</div>
+      <span>🎮 Play 10 times</span>
+      <strong id="mission10">0 / 10</strong>
     </div>
 
     <div class="mission">
-      ⭐ Reach Level 5
-      <div id="missionLevel">Level 1 / 5</div>
+      <span>⭐ Reach Level 5</span>
+      <strong id="missionLevel">Level 1 / 5</strong>
     </div>
 
   </div>
 
+  <!-- REFERRAL -->
   <div class="card">
 
     <h3>👥 Invite Friends</h3>
@@ -254,14 +442,20 @@ button {
 
   </div>
 
+  <!-- WALLET -->
   <div class="card">
 
     <h3>💰 Reward Wallet</h3>
 
-    <p>
-      Available:
-      <strong id="walletCoins">0</strong> coins
-    </p>
+    <div class="wallet">
+      <div class="wallet-title">
+        Available Balance
+      </div>
+
+      <div class="wallet-coins">
+        🪙 <span id="walletCoins">0</span>
+      </div>
+    </div>
 
     <p class="small">
       Minimum withdrawal: 100 coins
@@ -304,6 +498,7 @@ button {
 
   </div>
 
+  <!-- LEADERBOARD -->
   <div class="card">
 
     <h3>🏆 Leaderboard</h3>
@@ -390,7 +585,7 @@ async function login() {
       "Player";
 
     document.getElementById("connection").textContent =
-      "Connected ✓";
+      "● Connected";
 
     createReferralLink();
 
@@ -453,12 +648,7 @@ function updateProgress(user) {
     progress + "%";
 
   document.getElementById("xpText").textContent =
-    "Level " + user.level +
-    " progress — " +
-    Math.round(progress) +
-    "% (" +
-    user.xp +
-    " XP)";
+    Math.round(progress) + "%";
 
   document.getElementById("missionLevel").textContent =
     "Level " + user.level + " / 5";
@@ -685,11 +875,12 @@ async function loadLeaderboard() {
           return `
             <div class="mission">
               <span>
-                #${index + 1} — ${name}
+                <span class="rank">#${index + 1}</span>
+                — ${name}
               </span>
 
               <strong>
-                ${user.coins} coins
+                ${user.coins} 🪙
               </strong>
             </div>
           `;
@@ -766,4 +957,4 @@ login();
 </script>
 
 </body>
-</html>
+  </html>
