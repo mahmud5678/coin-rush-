@@ -457,6 +457,28 @@ app.post("/api/admin/withdrawals/:id/reject", adminAuth, (req, res) => {
     }
   );
 });
+app.get("/api/admin/withdrawals/all", adminAuth, (req, res) => {
+  db.all(
+    `SELECT id, telegram_id, amount, method, payment_number,
+            status, created_at, processed_at
+     FROM withdrawals
+     ORDER BY created_at DESC`,
+    [],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          error: err.message
+        });
+      }
+
+      res.json({
+        success: true,
+        withdrawals: rows
+      });
+    }
+  );
+});
 app.listen(PORT, () => {
   console.log(`Coin Rush backend running on port ${PORT}`);
 });
