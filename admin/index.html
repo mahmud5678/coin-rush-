@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Rush Admin</title>
-
-<style>
+<title>Coin Rush Admin</title><style>
 body{
   margin:0;
   padding:20px;
@@ -70,137 +67,146 @@ button{
   border-radius:10px;
   margin-top:10px;
 }
-</style>
-</head>
+</style></head><body><div class="container"><h1>🛠️ Coin Rush Admin</h1><div class="card" id="loginBox"><h3>Admin Login</h3><input
+type="password"
+id="adminKey"
+placeholder="Admin key"
 
-<body>
+«»
 
-<div class="container">
+<button class="login" onclick="login()">
+🔐 LOGIN
+</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>💰 Withdrawal Requests</h2><button onclick="loadRequests()">
+🔄 REFRESH REQUESTS
+</button><div id="requests">
+Loading...
+</div></div></div><script>
 
-  <h1>🛠️ Coin Rush Admin</h1>
+const API = "https://coin-rush-nxeb.onrender.com";
 
-  <div class="card" id="loginBox">
-
-    <h3>Admin Login</h3>
-
-    <input
-      type="password"
-      id="adminKey"
-      placeholder="Admin key"
-    >
-
-    <button class="login" onclick="login()">
-      🔐 LOGIN
-    </button>
-
-    <p id="loginMessage"></p>
-
-  </div>
-
-
-  <div class="card" id="panel" style="display:none">
-
-    <h2>💰 Withdrawal Requests</h2>
-
-    <button onclick="loadRequests()">
-      🔄 REFRESH REQUESTS
-    </button>
-
-    <div id="requests">
-      No requests loaded.
-    </div>
-
-  </div>
-
-</div>
-
-
-<script>
-
-let loggedIn = false;
-
-
-/*
-  Demo admin login.
-
-  IMPORTANT:
-  Real authentication must be handled
-  by the backend, not this page.
-*/
+let adminKey = "";
 
 function login(){
 
-  const key =
-    document.getElementById(
-      "adminKey"
-    ).value;
+  adminKey =
+    document.getElementById("adminKey").value.trim();
 
-  if(key === "CHANGE_THIS_ADMIN_KEY"){
+  if(!adminKey){
 
-    loggedIn = true;
+    document.getElementById("loginMessage").innerText =
+      "❌ Admin key required.";
 
-    document.getElementById(
-      "loginBox"
-    ).style.display = "none";
+    return;
+  }
 
-    document.getElementById(
-      "panel"
-    ).style.display = "block";
+  loadRequests();
 
-    loadRequests();
+}
 
-  }else{
+async function loadRequests(){
 
-    document.getElementById(
-      "loginMessage"
-    ).innerText =
-      "❌ Wrong admin key.";
+  const box =
+    document.getElementById("requests");
+
+  box.innerHTML = "⏳ Loading...";
+
+  try{
+
+    const response = await fetch(
+      API + "/api/admin/withdrawals",
+      {
+        headers:{
+          "x-admin-key": adminKey
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+
+      document.getElementById("loginMessage").innerText =
+        "❌ Wrong admin key.";
+
+      return;
+    }
+
+    document.getElementById("loginBox").style.display =
+      "none";
+
+    document.getElementById("panel").style.display =
+      "block";
+
+    if(!data.withdrawals || data.withdrawals.length === 0){
+
+      box.innerHTML = `
+        <div class="request">
+          <strong>✅ No pending withdrawals.</strong>
+        </div>
+      `;
+
+      return;
+    }
+
+    box.innerHTML = data.withdrawals.map(item => `
+
+      <div class="request">
+
+        <p><strong>ID:</strong> ${item.id}</p>
+
+        <p><strong>Telegram ID:</strong> ${item.telegram_id}</p>
+
+        <p><strong>Amount:</strong> ${item.amount} coins</p>
+
+        <p><strong>Method:</strong> ${item.method}</p>
+
+        <p><strong>Payment Number:</strong> ${item.payment_number}</p>
+
+        <p><strong>Status:</strong> ${item.status}</p>
+
+        <p><strong>Date:</strong> ${item.created_at}</p>
+
+        <button class="approve"
+          onclick="approve(${item.id})">
+          ✅ APPROVE
+        </button>
+
+        <button class="reject"
+          onclick="reject(${item.id})">
+          ❌ REJECT
+        </button>
+
+      </div>
+
+    `).join("");
+
+  }catch(error){
+
+    box.innerHTML = `
+      <div class="request">
+        ❌ Connection error.
+      </div>
+    `;
 
   }
 
 }
 
-
-/*
-  Placeholder until backend API
-  is connected.
-*/
-
-function loadRequests(){
-
-  const box =
-    document.getElementById(
-      "requests"
-    );
-
-  box.innerHTML = `
-    <div class="request">
-      <strong>No withdrawal requests.</strong>
-      <p>Backend API will appear here after connection.</p>
-    </div>
-  `;
-
-}
-
-
 function approve(id){
 
   alert(
-    "Approve API will be connected in the backend step."
+    "Approve API এখনো backend-এ যোগ করা হয়নি।"
   );
 
 }
-
 
 function reject(id){
 
   alert(
-    "Reject API will be connected in the backend step."
+    "Reject API এখনো backend-এ যোগ করা হয়নি।"
   );
 
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
