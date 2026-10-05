@@ -349,6 +349,114 @@ app.get("/api/admin/withdrawals", adminAuth, (req, res) => {
     }
   );
 });
+app.post("/api/admin/withdrawals/:id/approve", adminAuth, (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid withdrawal ID"
+    });
+  }
+
+  db.run(
+    `UPDATE withdrawals
+     SET status = 'approved',
+         processed_at = CURRENT_TIMESTAMP
+     WHERE id = ? AND status = 'pending'`,
+    [id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          error: err.message
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "Withdrawal not found or already processed"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Withdrawal approved"
+      });
+    }
+  );
+});
+
+
+app.post("/api/admin/withdrawals/:id/reject", adminAuth, (req, res) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid withdrawal ID"
+    });
+  }
+
+  db.get(
+    `SELECT telegram_id, amount
+     FROM withdrawals
+     WHERE id = ? AND status = 'pending'`,
+    [id],
+    (err, withdrawal) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          error: err.message
+        });
+      }
+
+      if (!withdrawal) {
+        return res.status(404).json({
+          success: false,
+          error: "Withdrawal not found or already processed"
+        });
+      }
+
+      db.run(
+        `UPDATE users
+         SET coins = coins + ?
+         WHERE telegram_id = ?`,
+        [withdrawal.amount, withdrawal.telegram_id],
+        function (refundErr) {
+          if (refundErr) {
+            return res.status(500).json({
+              success: false,
+              error: refundErr.message
+            });
+          }
+
+          db.run(
+            `UPDATE withdrawals
+             SET status = 'rejected',
+                 processed_at = CURRENT_TIMESTAMP
+             WHERE id = ?`,
+            [id],
+            function (updateErr) {
+              if (updateErr) {
+                return res.status(500).json({
+                  success: false,
+                  error: updateErr.message
+                });
+              }
+
+              res.json({
+                success: true,
+                message: "Withdrawal rejected and coins refunded"
+              });
+            }
+          );
+        }
+      );
+    }
+  );
+});
 app.listen(PORT, () => {
   console.log(`Coin Rush backend running on port ${PORT}`);
 });
