@@ -674,7 +674,7 @@ app.post("/api/withdraw", auth, (req, res) => {
   }
 
   if (
-    !["bkash", "nagad"].includes(method)
+    !["bkash", "telegram_wallet"].includes(method)
   ) {
     return res.status(400).json({
       success: false,
