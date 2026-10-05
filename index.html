@@ -189,7 +189,7 @@ button {
 
     </div>
 
-    <p>Level progress</p>
+    <p id="xpText">Level progress</p>
 
     <div class="progress">
       <div id="xpBar"></div>
@@ -326,9 +326,8 @@ tg.ready();
 tg.expand();
 
 const initData = tg.initData || "";
-alert(initData ? "Telegram data পাওয়া গেছে" : "Telegram data পাওয়া যায়নি");
+
 let currentUser = null;
-let playCount = 0;
 
 
 /* =========================
@@ -434,6 +433,9 @@ async function loadProfile() {
   document.getElementById("level").textContent =
     user.level;
 
+  document.getElementById("plays").textContent =
+    user.plays || 0;
+
   updateProgress(user);
 }
 
@@ -444,20 +446,31 @@ async function loadProfile() {
 
 function updateProgress(user) {
 
-  const xpProgress =
-    Math.min((user.xp % 10) * 10, 100);
+  const progress =
+    Number(user.xp_progress || 0);
 
   document.getElementById("xpBar").style.width =
-    xpProgress + "%";
+    progress + "%";
+
+  document.getElementById("xpText").textContent =
+    "Level " + user.level +
+    " progress — " +
+    Math.round(progress) +
+    "% (" +
+    user.xp +
+    " XP)";
 
   document.getElementById("missionLevel").textContent =
     "Level " + user.level + " / 5";
 
+  const totalPlays =
+    Number(user.plays || 0);
+
   document.getElementById("mission5").textContent =
-    Math.min(playCount, 5) + " / 5";
+    Math.min(totalPlays, 5) + " / 5";
 
   document.getElementById("mission10").textContent =
-    Math.min(playCount, 10) + " / 10";
+    Math.min(totalPlays, 10) + " / 10";
 }
 
 
@@ -482,10 +495,9 @@ async function playGame() {
       throw new Error(data.error || "Game failed");
     }
 
-    playCount++;
-
     message.textContent =
-      "+" + data.reward + " coins 🎉";
+      "+" + data.reward +
+      " coins 🎉";
 
     await loadProfile();
 
