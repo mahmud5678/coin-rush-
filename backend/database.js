@@ -18,7 +18,6 @@ db.serialize(() => {
     )
   `);
 
-  // Existing database হলে plays column যোগ করবে
   db.run(`
     ALTER TABLE users
     ADD COLUMN plays INTEGER DEFAULT 0
@@ -27,7 +26,6 @@ db.serialize(() => {
       console.log("plays column:", err.message);
     }
   });
-
 
   db.run(`
     CREATE TABLE IF NOT EXISTS game_events (
@@ -39,7 +37,6 @@ db.serialize(() => {
     )
   `);
 
-
   db.run(`
     CREATE TABLE IF NOT EXISTS withdrawals (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,6 +47,38 @@ db.serialize(() => {
       status TEXT DEFAULT 'pending',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       processed_at DATETIME
+    )
+  `);
+
+  /* =========================
+     SPONSORED MISSIONS
+  ========================= */
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sponsored_missions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      reward INTEGER NOT NULL,
+      sponsor TEXT,
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  /* =========================
+     PLAYER MISSION CLAIMS
+  ========================= */
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS mission_claims (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      mission_id INTEGER NOT NULL,
+      telegram_id TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      processed_at DATETIME,
+      UNIQUE(mission_id, telegram_id)
     )
   `);
 
