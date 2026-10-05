@@ -1,0 +1,12 @@
+{
+  "name": "coin-rush-backend",
+  "version": "1.0.0",
+  "description": "Coin Rush Telegram game backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
