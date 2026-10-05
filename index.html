@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coin Rush</title>
+
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:Arial,sans-serif;
@@ -13,23 +17,30 @@ body{
   color:white;
   text-align:center;
 }
+
 .game{
   max-width:500px;
   min-height:100vh;
   margin:auto;
   padding:20px;
 }
-h1{margin:10px 0}
+
+h1{
+  margin:10px 0;
+}
+
 .card{
   background:#1c2442;
   border-radius:20px;
   padding:20px;
   margin:15px 0;
 }
+
 .coins{
   font-size:38px;
   font-weight:bold;
 }
+
 button{
   border:0;
   border-radius:14px;
@@ -39,11 +50,23 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
+
 .play{
   width:80%;
   font-size:20px;
 }
-#message{
+
+input{
+  width:80%;
+  padding:14px;
+  border-radius:12px;
+  border:0;
+  margin:10px;
+  font-size:16px;
+}
+
+#message,
+#withdrawMessage{
   min-height:25px;
   margin:10px;
 }
@@ -51,97 +74,165 @@ button{
 </head>
 
 <body>
+
 <div class="game">
 
-  <h1>🪙 Coin Rush</h1>
+<h1>🪙 Coin Rush</h1>
 
-  <div class="card">
-    <div>Your Coins</div>
-    <div class="coins">🪙 <span id="coins">0</span></div>
-    <div>Level: <span id="level">1</span></div>
-    <div>XP: <span id="xp">0</span>/100</div>
-  </div>
+<div class="card">
+  <div>Your Coins</div>
+  <div class="coins">🪙 <span id="coins">0</span></div>
+  <div>Level: <span id="level">1</span></div>
+  <div>XP: <span id="xp">0</span>/100</div>
+</div>
 
-  <div class="card">
-    <h2>⚡ Coin Challenge</h2>
-    <p>Press the button to collect coins!</p>
+<div class="card">
+  <h2>⚡ Coin Challenge</h2>
+  <p>Press the button to collect coins!</p>
 
-    <button class="play" onclick="playGame()">
-      🎮 PLAY
-    </button>
+  <button class="play" onclick="playGame()">
+    🎮 PLAY
+  </button>
 
-    <div id="message"></div>
-  </div>
+  <div id="message"></div>
+</div>
 
-  <div class="card">
-    <h2>🏆 Leaderboard</h2>
-    <p>🥇 Player 1 — 1250 coins</p>
-    <p>🥈 Player 2 — 980 coins</p>
-    <p>🥉 Player 3 — 750 coins</p>
-  </div>
+<div class="card">
+  <h2>🏆 Leaderboard</h2>
+  <p>🥇 Player 1 — 1250 coins</p>
+  <p>🥈 Player 2 — 980 coins</p>
+  <p>🥉 Player 3 — 750 coins</p>
+</div>
 
-  <button onclick="dailyReward()">🎁 Daily Reward</button>
-  <button onclick="resetGame()">🔄 Reset</button>
+<div class="card">
+  <h2>💰 Reward Wallet</h2>
+
+  <p>
+    Available Reward:
+    ৳<span id="balance">0</span>
+  </p>
+
+  <input
+    id="withdrawAmount"
+    type="number"
+    placeholder="Minimum ৳100"
+    min="100"
+  >
+
+  <button onclick="withdraw()">
+    💸 Withdraw
+  </button>
+
+  <div id="withdrawMessage"></div>
+</div>
+
+<button onclick="dailyReward()">🎁 Daily Reward</button>
+<button onclick="resetGame()">🔄 Reset</button>
 
 </div>
 
 <script>
+
 let coins = Number(localStorage.getItem("coins")) || 0;
 let xp = Number(localStorage.getItem("xp")) || 0;
 let level = Number(localStorage.getItem("level")) || 1;
+let balance = Number(localStorage.getItem("balance")) || 0;
 
 function update(){
+
   document.getElementById("coins").textContent = coins;
   document.getElementById("xp").textContent = xp;
   document.getElementById("level").textContent = level;
+  document.getElementById("balance").textContent = balance;
 
-  localStorage.setItem("coins",coins);
-  localStorage.setItem("xp",xp);
-  localStorage.setItem("level",level);
+  localStorage.setItem("coins", coins);
+  localStorage.setItem("xp", xp);
+  localStorage.setItem("level", level);
+  localStorage.setItem("balance", balance);
 }
 
 function playGame(){
+
   let reward = Math.floor(Math.random()*21)+10;
 
   coins += reward;
   xp += 10;
 
+  document.getElementById("message").textContent =
+    "🪙 +" + reward + " coins!";
+
   if(xp >= 100){
+
     xp -= 100;
     level++;
+
     document.getElementById("message").textContent =
       "🎉 LEVEL UP! You reached Level " + level;
-  }else{
-    document.getElementById("message").textContent =
-      "🪙 +" + reward + " coins!";
   }
 
   update();
 }
 
 function dailyReward(){
+
   let today = new Date().toDateString();
   let last = localStorage.getItem("daily");
 
   if(last === today){
+
     document.getElementById("message").textContent =
       "⏳ Daily reward already claimed!";
+
     return;
   }
 
   coins += 100;
-  localStorage.setItem("daily",today);
+
+  localStorage.setItem("daily", today);
 
   document.getElementById("message").textContent =
     "🎁 +100 daily coins!";
+
   update();
 }
 
+function withdraw(){
+
+  let amount =
+    Number(document.getElementById("withdrawAmount").value);
+
+  let message =
+    document.getElementById("withdrawMessage");
+
+  if(amount < 100){
+
+    message.textContent =
+      "⚠️ Minimum withdrawal is ৳100.";
+
+    return;
+  }
+
+  if(amount > balance){
+
+    message.textContent =
+      "❌ Insufficient reward balance.";
+
+    return;
+  }
+
+  message.textContent =
+    "✅ Withdrawal request received.";
+}
+
 function resetGame(){
-  coins=0;
-  xp=0;
-  level=1;
+
+  coins = 0;
+  xp = 0;
+  level = 1;
+  balance = 0;
+
   localStorage.clear();
+
   update();
 
   document.getElementById("message").textContent =
@@ -149,7 +240,8 @@ function resetGame(){
 }
 
 update();
+
 </script>
 
 </body>
-</html>
+  </html>
