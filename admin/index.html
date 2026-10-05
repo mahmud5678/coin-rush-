@@ -80,7 +80,41 @@ placeholder="Admin key"
 
 <button class="login" onclick="login()">
 🔐 LOGIN
-</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>💰 Withdrawal Management</h2><button onclick="loadRequests()">
+</button><p id="loginMessage"></p></div><div class="card" id="panel" style="display:none"><h2>💰 Withdrawal Management</h2>
+  <div id="stats" style="
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:20px;
+">
+
+  <div class="request">
+    <strong>👥 Total Users</strong>
+    <h2 id="totalUsers">-</h2>
+  </div>
+
+  <div class="request">
+    <strong>⏳ Pending</strong>
+    <h2 id="pendingCount">-</h2>
+  </div>
+
+  <div class="request">
+    <strong>✅ Approved</strong>
+    <h2 id="approvedCount">-</h2>
+  </div>
+
+  <div class="request">
+    <strong>❌ Rejected</strong>
+    <h2 id="rejectedCount">-</h2>
+  </div>
+
+  <div class="request" style="grid-column:1/-1">
+    <strong>💰 Total Withdrawal Coins</strong>
+    <h2 id="totalCoins">-</h2>
+  </div>
+
+  </div>
+  <button onclick="loadRequests()">
 🔄 REFRESH
 </button><h3>⏳ Pending Withdrawals</h3><div id="pendingRequests">
 Loading...
