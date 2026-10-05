@@ -450,14 +450,38 @@
 
 
   <!-- WITHDRAW -->
+<div class="card">
+  <h3>💰 Withdraw</h3>
 
-  <div class="card">
+  <p class="small">
+    Minimum withdrawal: 100 coins.
+  </p>
 
-    <h3>💰 Withdraw</h3>
+  <input
+    id="withdrawAmount"
+    type="number"
+    min="100"
+    placeholder="Amount of coins"
+  >
 
-    <p class="small">
-      Minimum withdrawal: 100 coins.
-    </p>
+  <select id="withdrawMethod">
+    <option value="bkash">bKash</option>
+    <option value="telegram_wallet">Telegram Wallet</option>
+  </select>
+
+  <input
+    id="paymentNumber"
+    type="text"
+    placeholder="bKash number / Telegram Wallet address"
+  >
+
+  <button class="gold" onclick="withdraw()">
+    💸 REQUEST WITHDRAWAL
+  </button>
+
+  <div id="withdrawMessage" class="message"></div>
+</div>
+
 
     <input
       id="withdrawAmount"
