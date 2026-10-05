@@ -2,107 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coin Rush</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-*{box-sizing:border-box;font-family:Arial,sans-serif}
-
-body{
- margin:0;
- min-height:100vh;
- color:white;
- background:linear-gradient(135deg,#111827,#1e3a8a)
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-.container{
- max-width:520px;
- margin:auto;
- padding:18px
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: white;
+  background: linear-gradient(135deg, #111827, #1e3a8a);
 }
 
-.card{
- background:rgba(255,255,255,.1);
- border-radius:18px;
- padding:18px;
- margin-bottom:15px
+.container {
+  max-width: 520px;
+  margin: auto;
+  padding: 18px;
 }
 
-h1{text-align:center}
-
-.subtitle{
- text-align:center;
- opacity:.7
+.card {
+  background: rgba(255,255,255,.1);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 15px;
 }
 
-.stats{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:10px
+h1 {
+  text-align: center;
 }
 
-.stat{
- background:rgba(0,0,0,.2);
- padding:14px;
- border-radius:12px;
- text-align:center
+h3 {
+  margin-top: 0;
 }
 
-.stat strong{
- display:block;
- font-size:24px;
- margin-top:5px
+.subtitle {
+  text-align: center;
+  opacity: .7;
 }
 
-button,input,select{
- width:100%;
- padding:13px;
- margin-top:9px;
- border:0;
- border-radius:10px
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-button{
- font-size:16px;
- font-weight:bold
+.stat {
+  background: rgba(0,0,0,.2);
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
 }
 
-.play{background:#facc15}
-.reward{background:#22c55e;color:white}
-.withdraw{background:#3b82f6;color:white}
-.referral{background:#8b5cf6;color:white}
-
-.mission{
- background:rgba(0,0,0,.2);
- padding:12px;
- margin-top:8px;
- border-radius:10px
+.stat strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 5px;
 }
 
-.progress{
- height:10px;
- background:rgba(255,255,255,.2);
- border-radius:10px;
- margin-top:10px;
- overflow:hidden
+button,
+input,
+select {
+  width: 100%;
+  padding: 13px;
+  margin-top: 9px;
+  border: 0;
+  border-radius: 10px;
 }
 
-#xpBar{
- height:100%;
- width:0%;
- background:#facc15
+button {
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.small{
- font-size:13px;
- opacity:.7
+.play {
+  background: #facc15;
+  color: #111827;
 }
 
-.message{
- text-align:center;
- margin-top:10px
+.reward {
+  background: #22c55e;
+  color: white;
+}
+
+.withdraw {
+  background: #3b82f6;
+  color: white;
+}
+
+.referral {
+  background: #8b5cf6;
+  color: white;
+}
+
+.mission {
+  background: rgba(0,0,0,.2);
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+}
+
+.progress {
+  height: 10px;
+  background: rgba(255,255,255,.2);
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+#xpBar {
+  height: 100%;
+  width: 0%;
+  background: #facc15;
+  transition: width .3s;
+}
+
+.small {
+  font-size: 13px;
+  opacity: .7;
+}
+
+.message {
+  text-align: center;
+  margin-top: 10px;
+  min-height: 20px;
+}
+
+#leaderboard .mission {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 </style>
 </head>
@@ -111,257 +146,232 @@ button{
 
 <div class="container">
 
-<div class="card">
-<h1>🪙 Coin Rush</h1>
-<div class="subtitle">Play • Earn • Complete Missions</div>
+  <div class="card">
+    <h1>🪙 Coin Rush</h1>
+    <div class="subtitle">
+      Play • Earn • Complete Missions
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>👤 Player</h3>
+
+    <div id="playerName">Connecting...</div>
+
+    <div class="small" id="connection">
+      Connecting to server...
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="stats">
+
+      <div class="stat">
+        🪙 Coins
+        <strong id="coins">0</strong>
+      </div>
+
+      <div class="stat">
+        ⭐ Level
+        <strong id="level">1</strong>
+      </div>
+
+      <div class="stat">
+        ⚡ XP
+        <strong id="xp">0</strong>
+      </div>
+
+      <div class="stat">
+        🎮 Plays
+        <strong id="plays">0</strong>
+      </div>
+
+    </div>
+
+    <p>Level progress</p>
+
+    <div class="progress">
+      <div id="xpBar"></div>
+    </div>
+
+    <button class="play" onclick="playGame()">
+      🎮 PLAY & EARN
+    </button>
+
+    <div class="message" id="gameMessage"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🎁 Daily Reward</h3>
+
+    <p class="small">
+      Claim your daily reward once per day.
+    </p>
+
+    <button class="reward" onclick="dailyReward()">
+      🎁 CLAIM DAILY REWARD
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🎯 Missions</h3>
+
+    <div class="mission">
+      🎮 Play 5 times
+      <div id="mission5">0 / 5</div>
+    </div>
+
+    <div class="mission">
+      🎮 Play 10 times
+      <div id="mission10">0 / 10</div>
+    </div>
+
+    <div class="mission">
+      ⭐ Reach Level 5
+      <div id="missionLevel">Level 1 / 5</div>
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>👥 Invite Friends</h3>
+
+    <p class="small">
+      Invite friends using your referral link.
+    </p>
+
+    <input id="refLink" readonly>
+
+    <button class="referral" onclick="copyReferral()">
+      📋 COPY REFERRAL LINK
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>💰 Reward Wallet</h3>
+
+    <p>
+      Available:
+      <strong id="walletCoins">0</strong> coins
+    </p>
+
+    <p class="small">
+      Minimum withdrawal: 100 coins
+    </p>
+
+    <select id="withdrawMethod">
+
+      <option value="">
+        Select payment method
+      </option>
+
+      <option value="bkash">
+        bKash
+      </option>
+
+      <option value="nagad">
+        Nagad
+      </option>
+
+    </select>
+
+    <input
+      id="withdrawAmount"
+      type="number"
+      min="100"
+      placeholder="Coin amount"
+    >
+
+    <input
+      id="paymentNumber"
+      type="text"
+      placeholder="bKash/Nagad number"
+    >
+
+    <button class="withdraw" onclick="withdrawRequest()">
+      💸 REQUEST WITHDRAWAL
+    </button>
+
+    <div class="message" id="withdrawMessage"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🏆 Leaderboard</h3>
+
+    <div id="leaderboard">
+      Loading...
+    </div>
+
+  </div>
+
 </div>
-
-<div class="card">
-<h3>👤 Player</h3>
-<div id="playerName">Connecting...</div>
-<div class="small" id="connection">Connecting to server...</div>
-</div>
-
-<div class="card">
-
-<div class="stats">
-
-<div class="stat">
-🪙 Coins
-<strong id="coins">0</strong>
-</div>
-
-<div class="stat">
-⭐ Level
-<strong id="level">1</strong>
-</div>
-
-<div class="stat">
-⚡ XP
-<strong id="xp">0</strong>
-</div>
-
-<div class="stat">
-🎮 Plays
-<strong id="plays">0</strong>
-</div>
-
-</div>
-
-<p>Level progress</p>
-
-<div class="progress">
-<div id="xpBar"></div>
-</div>
-
-<button class="play" onclick="playGame()">
-🎮 PLAY & EARN
-</button>
-
-<div class="message" id="gameMessage"></div>
-
-</div>
-
-
-<div class="card">
-
-<h3>🎁 Daily Reward</h3>
-
-<p class="small">
-Claim your daily reward once per day.
-</p>
-
-<button class="reward" onclick="dailyReward()">
-🎁 CLAIM DAILY REWARD
-</button>
-
-</div>
-
-
-<div class="card">
-
-<h3>🎯 Missions</h3>
-
-<div class="mission">
-🎮 Play 5 times
-<div id="mission5">0 / 5</div>
-</div>
-
-<div class="mission">
-🎮 Play 10 times
-<div id="mission10">0 / 10</div>
-</div>
-
-<div class="mission">
-⭐ Reach Level 5
-<div id="missionLevel">Level 1 / 5</div>
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>👥 Invite Friends</h3>
-
-<p class="small">
-Invite friends using your referral link.
-</p>
-
-<input id="refLink" readonly>
-
-<button class="referral" onclick="copyReferral()">
-📋 COPY REFERRAL LINK
-</button>
-
-</div>
-
-
-<div class="card">
-
-<h3>💰 Reward Wallet</h3>
-
-<p>
-Available:
-<strong id="walletCoins">0</strong> coins
-</p>
-
-<p class="small">
-Minimum withdrawal: 100 coins
-</p>
-
-<select id="withdrawMethod">
-
-<option value="">
-Select payment method
-</option>
-
-<option value="bKash">
-bKash
-</option>
-
-<option value="Nagad">
-Nagad
-</option>
-
-</select>
-
-<input
- id="withdrawAmount"
- type="number"
- min="100"
- placeholder="Coin amount">
-
-<input
- id="paymentNumber"
- type="text"
- placeholder="bKash/Nagad number">
-
-<button class="withdraw" onclick="withdrawRequest()">
-💸 REQUEST WITHDRAWAL
-</button>
-
-<div class="message" id="withdrawMessage"></div>
-
-</div>
-
-
-<div class="card">
-
-<h3>🏆 Leaderboard</h3>
-
-<div id="leaderboard">
-Loading...
-</div>
-
-</div>
-
-</div>
-
 
 <script>
 
-const API =
-"https://coin-rush-nxeb.onrender.com";
-
-const tg =
-window.Telegram.WebApp;
-
-tg.ready();
-tg.expand();
-
-
-let initData =
-tg.initData || "";
-
-let currentUser = null;
-
-
-/* =========================
-   SERVER REQUEST
-========================= */
-
-async function api(path, options={}){
-
- const response =
- await fetch(API + path, {
-
-   ...options,
-
-   headers:{
-     "Content-Type":
-       "application/json",
-
-     ...(options.headers || {})
-   }
-
- });
-
- return await response.json();
-
-}
-
-
-/* =========================
-   AUTH
-========================= */
-
-async function login(){
-
- try{
-
-   if(!initData){
-
-     document.getElementById(
-      
-<script>
 const API = "https://coin-rush-nxeb.onrender.com";
+
 const tg = window.Telegram.WebApp;
 
 tg.ready();
 tg.expand();
 
 const initData = tg.initData || "";
+
 let currentUser = null;
+let playCount = 0;
+
+
+/* =========================
+   SERVER REQUEST
+========================= */
 
 async function api(path, options = {}) {
+
   const response = await fetch(API + path, {
+
     ...options,
+
     headers: {
       "Content-Type": "application/json",
       "x-telegram-init-data": initData,
       ...(options.headers || {})
     }
+
   });
 
-  return await response.json();
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Server error");
+  }
+
+  return data;
 }
 
+
+/* =========================
+   LOGIN
+========================= */
+
 async function login() {
+
   try {
+
     if (!initData) {
+
       document.getElementById("connection").textContent =
         "Open this game from Telegram.";
+
       return;
     }
 
@@ -376,22 +386,34 @@ async function login() {
     currentUser = data.user;
 
     document.getElementById("playerName").textContent =
-      currentUser.first_name || currentUser.username || "Player";
+      currentUser.first_name ||
+      currentUser.username ||
+      "Player";
 
     document.getElementById("connection").textContent =
       "Connected ✓";
+
+    createReferralLink();
 
     await loadProfile();
     await loadLeaderboard();
 
   } catch (error) {
+
     console.error(error);
+
     document.getElementById("connection").textContent =
       "Connection failed: " + error.message;
   }
 }
 
+
+/* =========================
+   PROFILE
+========================= */
+
 async function loadProfile() {
+
   const data = await api("/api/profile");
 
   if (!data.success) {
@@ -400,27 +422,58 @@ async function loadProfile() {
 
   const user = data.user;
 
-  document.getElementById("coins").textContent = user.coins;
-  document.getElementById("walletCoins").textContent = user.coins;
-  document.getElementById("xp").textContent = user.xp;
-  document.getElementById("level").textContent = user.level;
+  document.getElementById("coins").textContent =
+    user.coins;
+
+  document.getElementById("walletCoins").textContent =
+    user.coins;
+
+  document.getElementById("xp").textContent =
+    user.xp;
+
+  document.getElementById("level").textContent =
+    user.level;
 
   updateProgress(user);
 }
 
+
+/* =========================
+   XP / MISSIONS
+========================= */
+
 function updateProgress(user) {
-  const progress = Math.min((user.xp % 10) * 10, 100);
-  document.getElementById("xpBar").style.width = progress + "%";
+
+  const xpProgress =
+    Math.min((user.xp % 10) * 10, 100);
+
+  document.getElementById("xpBar").style.width =
+    xpProgress + "%";
 
   document.getElementById("missionLevel").textContent =
     "Level " + user.level + " / 5";
+
+  document.getElementById("mission5").textContent =
+    Math.min(playCount, 5) + " / 5";
+
+  document.getElementById("mission10").textContent =
+    Math.min(playCount, 10) + " / 10";
 }
 
+
+/* =========================
+   PLAY GAME
+========================= */
+
 async function playGame() {
-  const message = document.getElementById("gameMessage");
+
+  const message =
+    document.getElementById("gameMessage");
+
   message.textContent = "Playing...";
 
   try {
+
     const data = await api("/api/game/play", {
       method: "POST"
     });
@@ -429,129 +482,276 @@ async function playGame() {
       throw new Error(data.error || "Game failed");
     }
 
-    message.textContent = "+" + data.reward + " coins 🎉";
+    playCount++;
+
+    message.textContent =
+      "+" + data.reward + " coins 🎉";
 
     await loadProfile();
 
   } catch (error) {
-    message.textContent = error.message;
+
+    message.textContent =
+      error.message;
   }
 }
+
+
+/* =========================
+   DAILY REWARD
+========================= */
 
 async function dailyReward() {
-  const message = document.getElementById("gameMessage");
-  message.textContent = "Claiming reward...";
+
+  const message =
+    document.getElementById("gameMessage");
+
+  message.textContent =
+    "Claiming reward...";
 
   try {
-    const data = await api("/api/reward/daily", {
-      method: "POST"
-    });
+
+    const data = await api(
+      "/api/reward/daily",
+      {
+        method: "POST"
+      }
+    );
 
     if (!data.success) {
-      throw new Error(data.error || "Reward failed");
+      throw new Error(
+        data.error || "Reward failed"
+      );
     }
 
-    message.textContent = "+" + data.reward + " coins 🎁";
+    message.textContent =
+      "+" + data.reward + " coins 🎁";
 
     await loadProfile();
 
   } catch (error) {
-    message.textContent = error.message;
+
+    message.textContent =
+      error.message;
   }
 }
 
+
+/* =========================
+   WITHDRAW
+========================= */
+
 async function withdrawRequest() {
+
   const amount = Number(
-    document.getElementById("withdrawAmount").value
+    document.getElementById(
+      "withdrawAmount"
+    ).value
   );
 
-  const method = document.getElementById("withdrawMethod").value;
+  const method =
+    document.getElementById(
+      "withdrawMethod"
+    ).value;
+
   const paymentNumber =
-    document.getElementById("paymentNumber").value.trim();
+    document.getElementById(
+      "paymentNumber"
+    ).value.trim();
 
   const message =
-    document.getElementById("withdrawMessage");
+    document.getElementById(
+      "withdrawMessage"
+    );
 
-  if (amount < 100) {
-    message.textContent = "Minimum withdrawal is 100 coins.";
+  if (!Number.isInteger(amount) || amount < 100) {
+
+    message.textContent =
+      "Minimum withdrawal is 100 coins.";
+
     return;
   }
 
   if (!method) {
-    message.textContent = "Select a payment method.";
+
+    message.textContent =
+      "Select a payment method.";
+
     return;
   }
 
   if (!paymentNumber) {
-    message.textContent = "Enter payment number.";
+
+    message.textContent =
+      "Enter payment number.";
+
     return;
   }
 
   try {
-    const data = await api("/api/withdraw", {
-      method: "POST",
-      body: JSON.stringify({
-        amount,
-        method: method.toLowerCase(),
-        payment_number: paymentNumber
-      })
-    });
+
+    const data = await api(
+      "/api/withdraw",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          amount: amount,
+          method: method,
+          payment_number: paymentNumber
+        })
+      }
+    );
 
     if (!data.success) {
-      throw new Error(data.error || "Withdrawal failed");
+      throw new Error(
+        data.error || "Withdrawal failed"
+      );
     }
 
     message.textContent =
       "Withdrawal request submitted ✓";
 
+    document.getElementById(
+      "withdrawAmount"
+    ).value = "";
+
+    document.getElementById(
+      "paymentNumber"
+    ).value = "";
+
     await loadProfile();
 
   } catch (error) {
-    message.textContent = error.message;
+
+    message.textContent =
+      error.message;
   }
 }
 
+
+/* =========================
+   LEADERBOARD
+========================= */
+
 async function loadLeaderboard() {
+
   try {
-    const data = await api("/api/leaderboard");
 
-    if (!data.success) return;
+    const data =
+      await api("/api/leaderboard");
 
-    const box = document.getElementById("leaderboard");
-
-    if (!data.leaderboard.length) {
-      box.textContent = "No players yet.";
+    if (!data.success) {
       return;
     }
 
-    box.innerHTML = data.leaderboard
-      .map((user, index) =>
-        `<div class="mission">
-          #${index + 1} —
-          ${user.first_name || user.username || "Player"}
-          <strong>${user.coins}</strong> coins
-        </div>`
-      )
-      .join("");
+    const box =
+      document.getElementById(
+        "leaderboard"
+      );
+
+    if (
+      !data.leaderboard ||
+      data.leaderboard.length === 0
+    ) {
+
+      box.textContent =
+        "No players yet.";
+
+      return;
+    }
+
+    box.innerHTML =
+      data.leaderboard
+        .map((user, index) => {
+
+          const name =
+            user.first_name ||
+            user.username ||
+            "Player";
+
+          return `
+            <div class="mission">
+              <span>
+                #${index + 1} — ${name}
+              </span>
+
+              <strong>
+                ${user.coins} coins
+              </strong>
+            </div>
+          `;
+
+        })
+        .join("");
 
   } catch (error) {
-    document.getElementById("leaderboard").textContent =
+
+    document.getElementById(
+      "leaderboard"
+    ).textContent =
       "Leaderboard unavailable.";
   }
 }
 
+
+/* =========================
+   REFERRAL
+========================= */
+
+function createReferralLink() {
+
+  if (!currentUser) {
+    return;
+  }
+
+  const link =
+    "https://t.me/macro_0bot?start=ref_" +
+    currentUser.telegram_id;
+
+  document.getElementById(
+    "refLink"
+  ).value = link;
+}
+
+
 function copyReferral() {
-  const input = document.getElementById("refLink");
+
+  const input =
+    document.getElementById(
+      "refLink"
+    );
 
   input.select();
+  input.setSelectionRange(
+    0,
+    99999
+  );
 
   try {
+
     document.execCommand("copy");
-    alert("Referral link copied!");
+
+    alert(
+      "Referral link copied!"
+    );
+
   } catch {
-    alert("Copy failed. Long press the link to copy.");
+
+    alert(
+      "Copy failed. Long press the link to copy."
+    );
   }
 }
 
+
+/* =========================
+   START
+========================= */
+
 login();
+
 </script>
+
+</body>
+</html>
